@@ -19,6 +19,7 @@ class LinearRegression():
             gradient = X.T.dot(X.dot(self.w) - y)
             # Update weights in the direction that minimizes loss
             self.w -= self.learning_rate * gradient
+        # TODO: implement pseudoinverse solution
 
     def predict(self, X):
         # Append same bias weights to new input
