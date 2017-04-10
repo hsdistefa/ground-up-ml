@@ -4,24 +4,51 @@ from sklearn import datasets
 
 
 class LinearRegression():
+    """Linear Regression
+
+    Args:
+        num_iterations (:obj: `int`, optional):
+            The number of iterations to do in the case of gradient descent.
+        learning_rate (:obj: `float`, optional):
+            The step magnitude used for updating the weights when doing gradient
+            descent.
+    """
     def __init__(self, num_iterations=100, learning_rate=.001):
         self.w = None
         self.num_iterations = num_iterations
         self.learning_rate = learning_rate
 
     def fit(self, X, y):
+        """Fit given training data to a linear model using regression
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Training data
+            y (numpy array of shape [n_samples]:
+                Labels
+        """
+        # TODO: implement pseudoinverse solution
         # Append bias weights to input
         X = np.insert(X, 0, 1, axis=1)
         # Initialize weights
         self.w = np.random.randn(X.shape[1])  # Could use truncated normal
         for _ in range(self.num_iterations):
-            # Compute gradient of squared error function w.r.t weights
+            # Compute gradient w.r.t. weights of squared error function
             gradient = X.T.dot(X.dot(self.w) - y)
             # Update weights in the direction that minimizes loss
             self.w -= self.learning_rate * gradient
-        # TODO: implement pseudoinverse solution
 
     def predict(self, X):
+        """Predict given test data using the linear model
+
+        Args:
+            X (numpy array of shape [t_samples, n_features]):
+                Test data
+
+        Returns:
+            C (numpy array of shape [n_samples,]):
+                Predicted values from test data
+        """
         # Append same bias weights to new input
         X = np.insert(X, 0, 1, axis=1)
         return X.dot(self.w)
