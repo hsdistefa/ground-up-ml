@@ -36,6 +36,7 @@ class KNN():
 
 
 def test():
+    # TODO: more comprehensive testing
     NUM_SAMPLES = 100
     NUM_FEATURES = 4
     np.random.seed(1005)

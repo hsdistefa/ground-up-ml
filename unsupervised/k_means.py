@@ -7,6 +7,9 @@ class KMeans():
         self.max_iterations = max_iterations
 
     def fit(self, X):
+        # Store number of samples and features in class variable
+        self._n_samples, self._n_features = np.shape(X)
+
         # Initialize centroids
         centroids = self._initialize_centroids(X)
         prev_centroids = np.zeros(self.k)
@@ -22,8 +25,8 @@ class KMeans():
 
             # Calculate new centroids
             prev_centroids = centroids
-            centroids = self._get_new_centroids(clusters, X)
-        return self._get_cluster_labels(clusters, X)
+            centroids = self._get_new_centroids(clusters)
+        return self._get_cluster_labels(clusters)
 
     def _get_clusters(self, centroids, X):
         # Create clusters by assigning each point to the nearest centroid
@@ -37,20 +40,19 @@ class KMeans():
                     closest_dist = dist
                     closest_index = j
             clusters[closest_index].append(x)  # possibly memory inefficient
-        return clusters
+        return np.array(clusters)
 
-    def _get_cluster_labels(self, clusters, X):
-        n_samples, _ = np.shape(X)
-        labels = np.zeros(n_samples, dtype=np.int32)
+    def _get_cluster_labels(self, clusters):
+        labels = np.zeros(self._n_samples, dtype=np.int32)
+        # Note: can be done better?
         for cluster_i, cluster in enumerate(clusters):
             for point_i, _ in enumerate(cluster):
                 labels[point_i] = cluster_i
         return labels
 
-    def _get_new_centroids(self, clusters, X):
+    def _get_new_centroids(self, clusters):
         # Calculate new centroids by taking the mean of each cluster
-        _, n_features = np.shape(X)
-        centroids = np.zeros((self.k, n_features))
+        centroids = np.zeros((self.k, self._n_features))
         for i, cluster in enumerate(clusters):
             centroids[i] = np.mean(cluster, axis=0)
         return centroids
@@ -59,10 +61,9 @@ class KMeans():
         # TODO: Random Partition, k-means++, minimax initialization
         # Forgy initialization
         #   i.e. Choose random points from X as initial centroids
-        n_samples, n_features = np.shape(X)
-        centroids = np.zeros((self.k, n_features))
+        centroids = np.zeros((self.k, self._n_features))
         for i in range(len(centroids)):
-            centroids[i] = X[np.random.choice(range(n_samples))]
+            centroids[i] = X[np.random.choice(range(self._n_samples))]
         return centroids
 
     def _euclidean_distance(self, x1, x2):
