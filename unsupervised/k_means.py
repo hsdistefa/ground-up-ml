@@ -2,11 +2,31 @@ import numpy as np
 
 
 class KMeans():
+    """K Means
+
+    Args:
+        k (int):
+            Number of clusters to create.
+        max_iterations (:obj: `int`, optional):
+            Cap for the number of iterations to do if the clustering has not
+            fully converged.
+    """
     def __init__(self, k, max_iterations=1000):
         self.k = k
         self.max_iterations = max_iterations
+        self._n_samples = None
+        self._n_features = None
 
     def fit(self, X):
+        """Classify each of the given samples into K different clusters
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Samples to classify
+        Returns:
+            C (numpy array of shape [n_samples]):
+                Cluster predictions for each sample
+        """
         # Store number of samples and features in class variable
         self._n_samples, self._n_features = np.shape(X)
 
