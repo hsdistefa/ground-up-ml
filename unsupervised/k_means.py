@@ -1,4 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
+import sklearn.datasets
 
 
 class KMeans():
@@ -17,7 +19,7 @@ class KMeans():
         self._n_samples = None
         self._n_features = None
 
-    def fit(self, X):
+    def predict(self, X):
         """Classify each of the given samples into K different clusters
 
         Args:
@@ -32,7 +34,7 @@ class KMeans():
 
         # Initialize centroids
         centroids = self._initialize_centroids(X)
-        prev_centroids = np.zeros(self.k)
+        prev_centroids = np.zeros((self.k, self._n_features))
         # Iterate only until convergence or max iterations
         for _ in range(self.max_iterations):
             # Has converged if the centroids haven't changed
@@ -45,7 +47,7 @@ class KMeans():
 
             # Calculate new centroids
             prev_centroids = centroids
-            centroids = self._get_new_centroids(clusters)
+            centroids = self._get_new_centroids(X, clusters)
         return self._get_cluster_labels(clusters)
 
     def _get_clusters(self, centroids, X):
@@ -59,22 +61,22 @@ class KMeans():
                 if dist < closest_dist:
                     closest_dist = dist
                     closest_index = j
-            clusters[closest_index].append(x)  # possibly memory inefficient
+            clusters[closest_index].append(i)
         return np.array(clusters)
 
     def _get_cluster_labels(self, clusters):
         labels = np.zeros(self._n_samples, dtype=np.int32)
         # Note: can be done better?
         for cluster_i, cluster in enumerate(clusters):
-            for point_i, _ in enumerate(cluster):
+            for point_i in cluster:
                 labels[point_i] = cluster_i
         return labels
 
-    def _get_new_centroids(self, clusters):
+    def _get_new_centroids(self, X, clusters):
         # Calculate new centroids by taking the mean of each cluster
         centroids = np.zeros((self.k, self._n_features))
         for i, cluster in enumerate(clusters):
-            centroids[i] = np.mean(cluster, axis=0)
+            centroids[i] = np.mean(X[cluster], axis=0)
         return centroids
 
     def _initialize_centroids(self, X):
@@ -91,12 +93,23 @@ class KMeans():
 
 
 def test():
-    # TODO: more in depth testing
-    np.random.seed(10001)
-    X = np.arange(10).reshape(5, 2)
-    km = KMeans(2, max_iterations=1)
-    print(X)
-    print(km.fit(X))
+    NUM_CLUSTERS = 3
+
+    # Make a dataset with clustered points
+    X, y = sklearn.datasets.make_blobs(centers=NUM_CLUSTERS)
+
+    # Predict clusters
+    km = KMeans(k=3)
+    predictions = km.predict(X)
+
+    # Plot clusters
+    f, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.scatter(X[:, 0], X[:, 1], c=y)
+    ax1.set_title('Actual Clusters')
+
+    ax2.scatter(X[:, 0], X[:, 1], c=predictions)
+    ax2.set_title('K Means Clusters')
+    plt.show()
 
 
 if __name__ == '__main__':
