@@ -3,9 +3,19 @@ import numpy as np
 
 class PCA():
     def __init__(self):
+        """Principal Component Analysis
+        """
         pass
 
     def transform(self, X, n_components):
+        """Project X onto the n principal components of X
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Data to be transformed
+            n_components (int):
+                Number of principal components to project the data onto
+        """
         # TODO: implement SVD solution
         n_samples, n_features = X.shape
 
