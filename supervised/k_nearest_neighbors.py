@@ -4,9 +4,26 @@ import scipy.stats
 
 class KNN():
     def __init__(self, k):
+        """K Nearest Neighbors
+
+        Args:
+            k (int):
+                Number of neighbors to use when evaluating test points
+        """
         self.k = k
 
     def predict(self, X_train, y_train, X_test):
+        """Using the k nearest neighbors in the given training data, lazy
+        evaluate the value of the given test data
+
+        Args:
+            X_train (numpy array of shape [n_samples, n_features]):
+                Training data
+            y_train (numpy array of shape [n_samples]):
+                Training labels
+            X_test (numpy array of shape [n_samples, n_features]):
+                Test data
+        """
         # TODO: implement KNN regression
         # For each sample in the test set, find the k closest samples in the
         # train set and the corresponding labels
