@@ -1,6 +1,8 @@
 import math
 
+import matplotlib.pyplot as plt
 import numpy as np
+from sklearn import datasets
 
 
 class PCA():
@@ -25,10 +27,12 @@ class PCA():
         """
         n_samples, n_features = X.shape
 
+        # Re-center input at the origin
+        X = X - np.mean(X, axis=0)
+
         # SVD Solution
         if self.svd:
             # Construct matrix Y such that Y^T Y is the covariance matrix
-            X = X - np.mean(X)  # First re-center input at the origin
             Y = X / math.sqrt(n_samples - 1)
 
             # Compute singular value decomposition
@@ -36,12 +40,10 @@ class PCA():
 
             # Pick the first n principal components that minimize redundancy
             PC = PC.T[:, :n_components]
-            print(PC)
 
         # Covariance matrix solution
         else:
             # Calculate the covariance matrix
-            X = X - np.mean(X)  # First re-center input at the origin
             cov = X.T.dot(X) / (n_samples - 1)
 
             # Get the eigenvectors and eigenvalues of the covariance matrix
@@ -57,19 +59,29 @@ class PCA():
 
             # Pick the first n principal components that minimize redundancy
             PC = PC[:, :n_components]
-            print(PC)
 
         # Project input onto the n principal components
         return X.dot(PC)
 
 
 def test():
-    # TODO: more comprehensive testing
-    np.random.seed(seed=4443)
+    # Get Data
+    data = datasets.load_digits()
+    X = data.data
+    y = data.target
+
+    # Transform
     pca = PCA(svd=False)
-    X = np.random.randn(10, 5)
-    transformed = pca.transform(X, 2)
-    print(transformed)
+    X_transformed = pca.transform(X, 2)
+    pc1 = X_transformed[:, 0]
+    pc2 = X_transformed[:, 1]
+
+    # Plot
+    plt.scatter(pc1, pc2, c=y)
+    plt.title('Digits Dataset 0-9')
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.show()
 
 
 if __name__ == '__main__':
