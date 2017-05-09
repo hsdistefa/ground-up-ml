@@ -14,7 +14,7 @@ class LinearRegression():
             descent.
         gradient_descent (bool):
             If true do gradient descent, else get exact solution using
-            Moore-Penrose Inverse (pseudoinverse)
+            least squares normal equation
     """
     def __init__(self, num_iterations=100, learning_rate=.001,
                  gradient_descent=True):
@@ -37,13 +37,14 @@ class LinearRegression():
 
         # Initialize weights
         self.w = np.random.randn(X.shape[1])  # Could use truncated normal
+        # Least squares gradient descent
         if self.gradient_descent:
             for _ in range(self.num_iterations):
                 # Compute gradient w.r.t. weights of squared error function
                 gradient = X.T.dot(X.dot(self.w) - y)
                 # Update weights in the direction that minimizes loss
                 self.w -= self.learning_rate * gradient
-        # Least Squares pseudoinverse exact solution
+        # Least Squares normal equation
         else:
             # Note: slow for large matrices
             U, S, V = np.linalg.svd(X.T.dot(X))
@@ -85,7 +86,7 @@ def test():
     lr_gd.fit(X_train, y_train)
     y_gd_pred = lr_gd.predict(X_test)
 
-    # Run pseudoinverse model
+    # Run normal model
     lr_pi = LinearRegression(gradient_descent=False)
     lr_pi.fit(X_train, y_train)
     y_pi_pred = lr_pi.predict(X_test)
