@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 import os
 import sys
 
@@ -104,8 +106,8 @@ def test():
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
 
-    # Compute and show the model error
-    error = np.sum(np.abs(y_test - y_pred)) / np.float32(len(y_test))
+    # Compute the model error
+    error = np.mean(np.abs(y_test - y_pred))
     accuracy = 1 - error
 
     # Plot the results

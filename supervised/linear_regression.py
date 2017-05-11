@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import datasets
