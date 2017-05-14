@@ -1,7 +1,18 @@
 from __future__ import division, print_function
 
+import os
+import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
+import sklearn.datasets
+
+# FIX: uncomment when not testing from __main__
+#from ..unsupervised.pca import PCA
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_path + '/../unsupervised/')
+from pca import PCA
 
 
 class KNN():
@@ -48,23 +59,58 @@ class KNN():
         # Take the majority vote of each of the k closest train samples to
         # determine the label to apply to each of the test samples
         modes, _ = scipy.stats.mode(labels_matrix, axis=1)
-        return modes
+        return modes.T
 
     def _euclidean_distance(self, x1, x2):
         return np.linalg.norm(x1 - x2)
 
 
 def test():
-    # TODO: more comprehensive testing
-    NUM_SAMPLES = 100
-    NUM_FEATURES = 4
-    np.random.seed(1005)
-    X_train = np.random.randn(NUM_SAMPLES, NUM_FEATURES)
-    y_train = np.random.randint(0, NUM_FEATURES+1, size=NUM_SAMPLES)
-    X_test = np.array([[2, 2, 7, 3],
-                      [-1, 5, 6, 10]])
+    np.random.seed(seed=777)
+
+    # Load dataset and normalize
+    iris = sklearn.datasets.load_iris()
+    data = iris.data[iris.target != 0]
+    l2 = np.atleast_1d(np.linalg.norm(data, 2, 1))
+    l2[l2 == 0] = 1
+    X = data / np.expand_dims(l2, 1)
+
+    y = iris.target[iris.target != 0]
+    y[y == 1] = 0
+    y[y == 2] = 1
+
+    # Shuffle data
+    y = y[np.newaxis].T
+    stacked = np.hstack((X, y))
+    np.random.shuffle(stacked)
+    X = stacked[:, :stacked.shape[1]-1]
+    y = stacked[:, stacked.shape[1]-1]
+
+    # Split into test and training sets
+    split_index = int(.7*len(data))
+    X_train = X[:split_index]
+    y_train = y[:split_index]
+    X_test = X[split_index:]
+    y_test = y[split_index:]
+
+    # Run the model
     knn = KNN(2)
-    print(knn.predict(X_train, y_train, X_test))
+    y_pred = knn.predict(X_train, y_train, X_test)
+
+    # Compute the model error
+    error = np.mean(np.abs(y_test - y_pred))
+    accuracy = 1 - error
+
+    # Plot the results
+    pca = PCA()
+    X_reduced = pca.transform(X_test, 2)
+    pc1 = X_reduced[:, 0]
+    pc2 = X_reduced[:, 1]
+    plt.scatter(pc1, pc2, c=y_pred)
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('K Nearest Neighbors (Accuracy: {:2f})'.format(accuracy))
+    plt.show()
 
 
 if __name__ == '__main__':
