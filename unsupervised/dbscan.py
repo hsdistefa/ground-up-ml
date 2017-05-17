@@ -1,12 +1,31 @@
+from __future__ import division, print_function
+
 import numpy as np
 
 
-class DBScan():
+class DBSCAN():
+    """Density-Based Spacial Clustering of Applications with Noise
+
+    Args:
+        min_pts (int):
+            Minimum number of points for a group to be considered a cluster
+        eps (:obj: `float`, optional):
+            Maximum distance to check for neighbors to a point
+    """
     def __init__(self, min_pts, eps=None):
         self.min_pts = min_pts
         self.eps = eps
 
     def predict(self, X):
+        """Classify the given input into clusters using DBSCAN
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Samples to classify
+        Returns:
+            C (numpy array of shape [n_samples]):
+                Cluster predictions for each sample
+        """
         n_samples, n_features = np.shape(X)
 
         # TODO
