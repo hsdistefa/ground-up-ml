@@ -1,6 +1,8 @@
 from __future__ import division, print_function
 
+import matplotlib.pyplot as plt
 import numpy as np
+from sklearn import datasets
 
 
 class DBSCAN():
@@ -38,36 +40,38 @@ class DBSCAN():
         cluster_i = 0
         labels = np.zeros(n_samples)
         for point_i, point in enumerate(X):
-            if point_i in self._visited:
+            if point_i in visited:
                 continue
-            self._visited.add(point_i)
+            visited.add(point_i)
             # Get the points within distance epsilon of point
             neighbors = self._find_neighbors(point, X)
 
             # Label point as noise if it has too few neighbors
             if len(neighbors) < self.min_pts:
-                self._labels[point_i] = -1
+                labels[point_i] = -1
             # Otherwise label point, neighbors, and neighbors of neighbors as
             # belonging to the same cluster
             else:
                 cluster_i += 1
                 labels[point_i] = cluster_i
-                labels, visited = self._expand_cluster(X, point, neighbors,
-                                                       cluster_i, visited,
-                                                       labels)
+                labels, visited = self._expand_cluster(X, neighbors, cluster_i,
+                                                       visited, labels)
         return labels
 
     def _choose_epsilon(self, X):
         # TODO: choose epsilon automatically
         pass
 
-    def _expand_cluster(self, X, point, neighbors, cluster_i, visited, labels):
+    def _expand_cluster(self, X, neighbors, cluster_i, visited, labels):
         for neighbor_i in neighbors:
             if neighbor_i not in visited:
                 visited.add(neighbor_i)
                 neighbors_prime = self._find_neighbors(X[neighbor_i], X)
                 if len(neighbors_prime) >= self.min_pts:
                     neighbors = np.concatenate((neighbors, neighbors_prime))
+                    labels, visited = self._expand_cluster(X, neighbors,
+                                                           cluster_i, visited,
+                                                           labels)
             if labels[neighbor_i] == 0:  # Neighbor is not in any cluster
                 labels[neighbor_i] = cluster_i
         return labels, visited
@@ -87,8 +91,21 @@ class DBSCAN():
 
 
 def test():
-    # TODO: testing
-    pass
+    # Load the dataset
+    X, y = datasets.make_moons(n_samples=400, noise=0.1)
+
+    # Cluster using DBSCAN
+    dbs = DBSCAN(min_pts=3, eps=.15)
+    y_pred = dbs.predict(X)
+
+    # Plot
+    f, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.scatter(X[:, 0], X[:, 1], c=y)
+    ax1.set_title('Actual Clustering')
+
+    ax2.scatter(X[:, 0], X[:, 1], c=y_pred)
+    ax2.set_title('DBSCAN Clustering')
+    plt.show()
 
 if __name__ == '__main__':
     test()
