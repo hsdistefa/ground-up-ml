@@ -14,10 +14,16 @@ class KMeans():
         max_iterations (:obj: `int`, optional):
             Cap for the number of iterations to do if the clustering has not
             fully converged.
+        init_method (:obj: `str`, optional):
+            Specifies the way in which centroids are initialized:
+                forgy: Centroids initialized as random samples from the input.
+                rand_part: Randomly partition each sample into clusters, then
+                           compute the centroids of those clusters.
     """
-    def __init__(self, k, max_iterations=1000):
+    def __init__(self, k, max_iterations=1000, init_method='forgy'):
         self.k = k
         self.max_iterations = max_iterations
+        self.init_method = init_method
         self._n_samples = None
         self._n_features = None
 
@@ -83,11 +89,31 @@ class KMeans():
 
     def _initialize_centroids(self, X):
         # TODO: Random Partition, k-means++, minimax initialization
+
         # Forgy initialization
         #   i.e. Choose random points from X as initial centroids
-        centroids = np.zeros((self.k, self._n_features))
-        for i in range(len(centroids)):
-            centroids[i] = X[np.random.choice(range(self._n_samples))]
+        if self.init_method == 'forgy':
+            centroids = np.zeros((self.k, self._n_features))
+            for i in range(len(centroids)):
+                centroids[i] = X[np.random.choice(range(self._n_samples))]
+
+        # Random Partition initialization
+        elif self.init_method == 'rand_part':
+            centroids = self._random_partition(X)
+
+        return centroids
+
+    def _random_partition(self, X):
+        # Assign each sample to a cluster randomly
+        clusters = [[] for _ in range(self.k)]
+        for i, x in enumerate(X):
+            cluster_i = np.random.randint(0, self.k+1)
+            clusters[cluster_i].append(i)
+        clusters = np.array(clusters)
+
+        # Compute centroids from partitioned clusters
+        centroids = self._get_new_centroids(X, clusters)
+
         return centroids
 
     def _euclidean_distance(self, x1, x2):
@@ -107,10 +133,10 @@ def test():
     # Plot clusters
     f, (ax1, ax2) = plt.subplots(1, 2)
     ax1.scatter(X[:, 0], X[:, 1], c=y)
-    ax1.set_title('Actual Clusters')
+    ax1.set_title('Actual Clustering')
 
     ax2.scatter(X[:, 0], X[:, 1], c=predictions)
-    ax2.set_title('K Means Clusters')
+    ax2.set_title('K Means Clustering')
     plt.show()
 
 
