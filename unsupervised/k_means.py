@@ -88,7 +88,11 @@ class KMeans():
         return centroids
 
     def _initialize_centroids(self, X):
-        # TODO: Random Partition, k-means++, minimax initialization
+        # TODO: k-means++, minimax initialization
+
+        # K-means++ initialization
+        if self.init_method == 'kpp':
+            centroids = self._kmeanspp(X)
 
         # Forgy initialization
         #   i.e. Choose random points from X as initial centroids
@@ -100,6 +104,46 @@ class KMeans():
         # Random Partition initialization
         elif self.init_method == 'rand_part':
             centroids = self._random_partition(X)
+
+        return centroids
+
+    def _kmeanspp(self, X):
+        # FIX: unfinished
+        centroids = np.zeros((self.k, self._n_features))
+
+        # Initialize the probability distribution for sampling each point
+        # Distribution is initially uniform
+        probs = np.zeros(self._n_samples).astype(np.float32)
+        probs.fill(1./self._n_samples)
+
+        for i in range(self.k):
+            # Choose a point from the input using the probability distribution
+            # and make that point a centroid
+            p_i = np.random.choice(range(self._n_samples), p=probs)
+            centroids[i] = X[p_i]
+
+            # Update probability distribution so that points farther from the
+            # nearest centroid to them are more likely to be chosen next
+            # sampling
+            prob_max = float('-inf')
+            prob_min = float('inf')
+            for i, x in enumerate(X):
+                closest_dist = float('inf')
+                for c in centroids:
+                    dist = self._euclidean_distance(x, c)
+                    if dist < closest_dist:
+                        closest_dist = dist
+                prob = closest_dist**2
+                # Remember max and min for normalization
+                if prob > prob_max:
+                    prob_max = prob
+                elif prob < prob_min:
+                    prob_min = prob
+                probs[i] = prob
+
+            # Normalize the probabilities between 0 and 1
+            # NOTE: better way to normalize?
+            probs = (probs - prob_min) / (prob_max - prob_min)
 
         return centroids
 
