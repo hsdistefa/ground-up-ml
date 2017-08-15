@@ -16,9 +16,14 @@ class KMeans():
             fully converged.
         init_method (:obj: `str`, optional):
             Specifies the way in which centroids are initialized:
-                forgy: Centroids initialized as random samples from the input.
+                forgy:     Select random points from input as initial centroids.
                 rand_part: Randomly partition each sample into clusters, then
-                           compute the centroids of those clusters.
+                           compute the centroids of those clusters. Tends to
+                           select initial centroids clustered near the first
+                           moment of input.
+                kpp:       Initialize centroids probabilistically so that
+                           they are much more likely to start farther from each
+                           other.
     """
     def __init__(self, k, max_iterations=1000, init_method='forgy'):
         self.k = k
@@ -84,15 +89,12 @@ class KMeans():
         # Calculate new centroids by taking the mean of each cluster
         centroids = np.zeros((self.k, self._n_features))
         for i, cluster in enumerate(clusters):
-            centroids[i] = np.mean(X[cluster], axis=0)
+            if X[cluster].size != 0:  # Avoid taking mean of empty cluster
+                centroids[i] = np.mean(X[cluster], axis=0)
         return centroids
 
     def _initialize_centroids(self, X):
-        # TODO: k-means++, minimax initialization
-
-        # K-means++ initialization
-        if self.init_method == 'kpp':
-            centroids = self._kmeanspp(X)
+        # TODO: minimax initialization
 
         # Forgy initialization
         #   i.e. Choose random points from X as initial centroids
@@ -100,6 +102,10 @@ class KMeans():
             centroids = np.zeros((self.k, self._n_features))
             for i in range(len(centroids)):
                 centroids[i] = X[np.random.choice(range(self._n_samples))]
+
+        # K-means++ initialization
+        elif self.init_method == 'kpp':
+            centroids = self._kmeanspp(X)
 
         # Random Partition initialization
         elif self.init_method == 'rand_part':
@@ -125,8 +131,6 @@ class KMeans():
             # Update probability distribution so that points farther from the
             # nearest centroid to them are more likely to be chosen next
             # sampling
-            prob_max = float('-inf')
-            prob_min = float('inf')
             for i, x in enumerate(X):
                 closest_dist = float('inf')
                 for c in centroids:
@@ -134,16 +138,10 @@ class KMeans():
                     if dist < closest_dist:
                         closest_dist = dist
                 prob = closest_dist**2
-                # Remember max and min for normalization
-                if prob > prob_max:
-                    prob_max = prob
-                elif prob < prob_min:
-                    prob_min = prob
                 probs[i] = prob
 
-            # Normalize the probabilities between 0 and 1
-            # NOTE: better way to normalize?
-            probs = (probs - prob_min) / (prob_max - prob_min)
+            # Normalize the probabilities so that they sum to 1
+            probs = probs / np.sum(probs)
 
         return centroids
 
@@ -151,7 +149,7 @@ class KMeans():
         # Assign each sample to a cluster randomly
         clusters = [[] for _ in range(self.k)]
         for i, x in enumerate(X):
-            cluster_i = np.random.randint(0, self.k+1)
+            cluster_i = np.random.randint(0, self.k)
             clusters[cluster_i].append(i)
         clusters = np.array(clusters)
 
@@ -168,10 +166,11 @@ def test():
     NUM_CLUSTERS = 3
 
     # Make a dataset with clustered points
+    np.random.seed(seed=5987)
     X, y = sklearn.datasets.make_blobs(centers=NUM_CLUSTERS)
 
     # Predict clusters
-    km = KMeans(k=3)
+    km = KMeans(k=3, init_method='kpp')
     predictions = km.predict(X)
 
     # Plot clusters
