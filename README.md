@@ -1,3 +1,18 @@
 # Ground Up Machine Learning
 
 A set of bare bones implementations of machine learning algorithms intended to be explanatory and used as a learning reference.
+
+## Installation
+    $ git clone https://github.com/hsdistefa/Ground-Up-ML
+    $ cd Ground-Up-ML
+
+### Using Docker
+[Install Docker](https://docs.docker.com/engine/installation/)
+
+Get the docker image and run, replacing /your/folder with desired folder to save jupyter notebooks in:
+    $ docker pull hsdistefa/ground-up-ml
+    $ docker run -it -p 8888:8888 -v /your/folder/notebooks:/notebooks ground-up-ml
+
+Copy and paste the URL for the jupyter server into your browser, it should be of the form:
+    `http://localhost:8888/?token=...`
+
