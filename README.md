@@ -5,6 +5,7 @@ A set of bare bones implementations of machine learning algorithms intended to b
 ## Installation
     $ git clone https://github.com/hsdistefa/Ground-Up-ML
     $ cd Ground-Up-ML
+    $ pip install -r requirements.txt
 
 ### Using Docker
 [Install Docker](https://docs.docker.com/engine/installation/)
