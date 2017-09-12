@@ -15,15 +15,23 @@ class LinearRegression():
             Step magnitude used for updating the weights when doing gradient
             descent.
         gradient_descent (bool):
-            If true do gradient descent, else get exact solution using
-            least squares normal equation
+            If True do gradient descent, else get exact solution using
+            least squares normal equation.
+        stochastic (bool):
+            If True and doing gradient descent, computes the loss on a random
+            subsample of the input at each step.
+        batch_size (int):
+            The number of samples to use for computing the loss at each step
+            when using stochastic gradient descent.
     """
     def __init__(self, num_iterations=100, learning_rate=.001,
-                 gradient_descent=True):
+                 gradient_descent=True, stochastic=False, batch_size=32):
         self.w = None
         self.num_iterations = num_iterations
         self.learning_rate = learning_rate
         self.gradient_descent = gradient_descent
+        self.stochastic = stochastic
+        self.batch_size = batch_size
 
     def fit(self, X, y):
         """Fit given training data to a linear model using regression
@@ -38,14 +46,28 @@ class LinearRegression():
         X = np.insert(X, 0, 1, axis=1)
 
         # Initialize weights
-        self.w = np.random.randn(X.shape[1])  # Could use truncated normal
+        self.w = np.random.randn(np.shape(X)[1])  # Could use truncated normal
         # Least squares gradient descent
         if self.gradient_descent:
             for _ in range(self.num_iterations):
+                # If stochastic gradient descent, only use a random subset of
+                # the input data at each step
+                if self.stochastic:
+                    indices = np.random.randint(np.shape(X)[0],
+                                                size=self.batch_size)
+                    x = X[indices, :]
+                    labels = y[indices]
+                # Else all input data at each step
+                else:
+                    x = X
+                    labels = y
+
                 # Compute gradient w.r.t. weights of squared error function
-                gradient = X.T.dot(X.dot(self.w) - y)
+                loss = np.dot(x, self.w) - labels
+                gradient = np.dot(x.T, loss)
                 # Update weights in the direction that minimizes loss
                 self.w -= self.learning_rate * gradient
+
         # Least Squares normal equation
         else:
             # Note: slow for large matrices
@@ -84,7 +106,7 @@ def test():
     y_test = y[split_index:]
 
     # Run gradient descent model
-    lr_gd = LinearRegression()
+    lr_gd = LinearRegression(stochastic=True)
     lr_gd.fit(X_train, y_train)
     y_gd_pred = lr_gd.predict(X_test)
 
@@ -102,7 +124,7 @@ def test():
 
     ax1.scatter(X_test[:, 0], y_test)
     ax1.plot(X_test[:, 0], y_gd_pred)
-    ax1.set_title('Linear Regression Gradient Descent (MSE: {:2f})'.format(
+    ax1.set_title('Linear Regression SGD (MSE: {:2f})'.format(
         mse_gd))
 
     ax2.scatter(X_test[:, 0], y_test)
