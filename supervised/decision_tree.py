@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from __future__ import division, print_function
 
 import math
@@ -7,25 +9,45 @@ import scipy.stats
 
 
 class DecisionNode():
-    def __init__(self, feature_index=None, children=None, value=None):
+    def __init__(self, feature_index=None, children=[], value=None):
         self.feature_index = feature_index
         self.children = children
         self.value = value
 
+    def _print_tree(self, prefix, is_leaf):
+        # TODO: better visualization
+        if self.value is not None:
+            is_leaf = True
+            name = str(self.value)  # Leaf value representation
+        else:
+            name = 'f' + str(self.feature_index)  # Nonleaf value representation
+        res = prefix + ('└──' if is_leaf else '├──') + name + '\n'
+
+        for child in self.children:
+            res += child._print_tree(
+                prefix + ('    ' if is_leaf else '│   '), False)
+
+        return res
+
 
 class DecisionTree():
-    def __init__(self, max_depth, root):
-        #self.max_depth = max_depth
-        self.root = None
+    def __init__(self, max_depth=None, root=None):
+        self.root = root
+        if max_depth is None:
+            self.max_depth = float('inf')
+        else:
+            self.max_depth = max_depth
+
+    def __str__(self):
+        return self.root._print_tree('', True)
 
     def fit(self, X, y):
         # Build tree
+        self.n_samples, self.n_features = np.shape(X)
         self.root = self.id3(X, y)
 
     def predict(self, X):
-        n_samples, n_features = np.shape(X)
-
-        predictions = np.zeros(n_samples)
+        predictions = np.zeros(np.shape(X)[0])
         for i, sample in enumerate(X):
             predictions[i] = self.predict_sample(sample)
 
@@ -40,20 +62,22 @@ class DecisionTree():
             return subtree.value
 
         feature_label = x[subtree.feature_index]
-        y_pred = self.predict(x, subtree=subtree.children[feature_label])
+        y_pred = self.predict_sample(x, subtree=subtree.children[feature_label])
 
         return y_pred
 
-    def id3(self, X, y, features=None):
-        # If all features used, return majority vote of labels as leaf node
-        if np.all(features.mask is True):
-            return DecisionNode(value=scipy.stats.mode(y)[0][0])
+    def id3(self, X, y, features=None, depth=0):
+        depth += 1
 
-        n_samples, n_features = X.shape
-
-        # Instantiate feature list if not specified
+        # Instantiate feature list at root
         if features is None:
-            features = np.ma.array(np.arange(n_features), mask=False)
+            features = np.ma.array(np.arange(self.n_features), mask=False)
+
+        # If all features used or max depth reached, return majority vote of
+        # labels as leaf node
+        if np.all(features.mask == True) or depth > self.max_depth:
+            leaf_value = scipy.stats.mode(y)[0][0]
+            return DecisionNode(value=leaf_value)
 
         # Find feature split that maximizes information gain
         max_gain = float('-inf')
@@ -61,8 +85,12 @@ class DecisionTree():
         best_splits_X = None
         best_splits_y = None
         for feature_i, feature in enumerate(features):
-            values = X[:, feature_i]
-            labels = np.unique(values)  # Possible labels for feature
+            # If a feature has already been split on don't use it
+            if features.mask[feature_i] == True:
+                continue
+
+            values = X[:, feature_i]  # All values for given feature
+            labels = np.unique(values)  # Unique values for given feature
 
             # Split into bins based on each possible feature value
             splits = [y[values == label] for label in labels]
@@ -78,11 +106,15 @@ class DecisionTree():
                 best_splits_y = splits
 
         # Split on the feature that maximizes information gain
-        features.mask[best_feature] = True  # Only want to split on feature once
+        features.mask[best_feature] = True  # Mark feature as used
         branches = []
         for i in range(len(best_splits_y)):
+            # Copy mask so that each branch has it's own copy, i.e. they don't
+            # all reference the same list
+            features_copy = np.ma.array(features, copy=True)
+
             branch = self.id3(best_splits_X[i], best_splits_y[i],
-                              features=features)
+                              features=features_copy, depth=depth)
             branches.append(branch)
 
         return DecisionNode(feature_index=best_feature, children=branches)
@@ -105,14 +137,26 @@ class DecisionTree():
 
         # Calculate information gain for given splits
         info_gain = self._entropy(y)
-        for i, split in splits:
+        for i, split in enumerate(splits):
             info_gain -= p[i]*self._entropy(split)
 
         return info_gain
 
 
 def test():
-    pass
+    # TODO: better testing
+    # AND function
+    X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+    y = np.array([0, 0, 0, 1])
+    test = np.array([[0, 1], [1, 1], [1, 0], [1, 0], [0, 0], [1, 1]])
+
+    print('train input', X)
+    dt = DecisionTree()
+    dt.fit(X, y)
+    print('train labels', y)
+    print('test input', test)
+    print(dt)
+    print('prediction', dt.predict(test))
 
 if __name__ == '__main__':
     test()
