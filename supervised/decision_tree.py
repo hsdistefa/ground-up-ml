@@ -23,9 +23,13 @@ class DecisionNode():
             name = 'f' + str(self.feature_index)  # Nonleaf value representation
         res = prefix + ('└──' if is_leaf else '├──') + name + '\n'
 
-        for child in self.children:
-            res += child._print_tree(
-                prefix + ('    ' if is_leaf else '│   '), False)
+        for i, child in enumerate(self.children):
+            if i == len(self.children) - 1:  # Don't put vertical if last child
+                res += child._print_tree(
+                    prefix + ('    ' if is_leaf else '│   '), True)
+            else:
+                res += child._print_tree(
+                    prefix + ('    ' if is_leaf else '│   '), False)
 
         return res
 
