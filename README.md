@@ -3,8 +3,8 @@
 A set of bare bones implementations of machine learning algorithms intended to be explanatory and used as a learning reference.
 
 ## Installation
-    $ git clone https://github.com/hsdistefa/Ground-Up-ML
-    $ cd Ground-Up-ML
+    $ git clone https://github.com/hsdistefa/ground-up-ml
+    $ cd ground-up-ml
     $ pip install -r requirements.txt
 
 ### Using Docker
