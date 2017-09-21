@@ -6,11 +6,22 @@ import numpy as np
 
 
 class NaiveBayes():
+    """Naive Bayes Classifier
+    """
 
     def __init__(self):
         self.labels = None
 
     def fit(self, X, y):
+        """Fit given training data using Baye's Theorem where the prior for each
+        label is the proportion of samples with that label
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Training data
+            y (numpy array of shape [n_samples]:
+                Training Labels
+        """
         self.n_samples, self.n_features = np.shape(X)
         self.labels = np.unique(y)
         self.params = {}
@@ -29,6 +40,17 @@ class NaiveBayes():
             self.params[label] = values
 
     def predict(self, X):
+        """Predict labels for test data using Baye's Theorem where the posterior
+        is calculated assuming that features are independent.
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Test data
+
+        Returns:
+            C (numpy array of shape [n_samples]):
+                Predicted class labels for test data
+        """
         # Choose the label that maximizes the naive posterior probability
         predictions = np.empty(self.n_samples)
         for i, sample in enumerate(X):
@@ -37,8 +59,8 @@ class NaiveBayes():
             for label_i, label in enumerate(self.labels):
                 # Get the parameters for the label to be used in calculating
                 # the probability
-                # Note: Although O(1), constant re-lookup of params could cause
-                # significant overhead
+                # Note: Constant re-lookup of params could cause unnecessary
+                # overhead
                 parameters = self.params[label]
                 prior = parameters['prior']
                 means = parameters['means']
@@ -78,8 +100,10 @@ class NaiveBayes():
         return posterior
 
     def _calculate_norm(self, x, mean, variance):
+        # Calculate the probability density at point x of a normal distribution
+        # with the given mean and variance
         if variance == 0:
-            variance = 10**-100  # Note: maybe a bad idea
+            variance = 10**-100  # Note: better solution to 0 variance?
 
         return (1.0 / (math.sqrt((2 * math.pi) * variance))) * \
             math.exp(-(math.pow(x - mean, 2) / (2.0 * variance)))
