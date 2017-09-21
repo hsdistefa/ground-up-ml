@@ -80,7 +80,7 @@ class LinearRegression():
         """Predict given test data using the linear model
 
         Args:
-            X (numpy array of shape [t_samples, n_features]):
+            X (numpy array of shape [n_samples, n_features]):
                 Test data
 
         Returns:
