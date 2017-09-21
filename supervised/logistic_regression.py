@@ -38,7 +38,7 @@ class LogisticRegression():
             y (numpy array of shape [n_samples]):
                 Training labels
         """
-        # Add bias weights to input
+        # Add bias term to input
         X = np.insert(X, 0, 1, axis=1)
 
         n_samples, n_features = np.shape(X)
@@ -62,7 +62,7 @@ class LogisticRegression():
 
         Returns:
             C (numpy array of shape [n_samples]):
-                Predicted values from test data
+                Predicted class labels for test data
         """
         # Add bias weights to input
         X = np.insert(X, 0, 1, axis=1)
@@ -70,7 +70,7 @@ class LogisticRegression():
         return np.round(self._sigmoid(X.dot(self.w))).astype(np.int32)
 
     def _sigmoid(self, thetaTX):
-        return 1 / (1 + np.exp(-thetaTX))
+        return 1.0 / (1.0 + np.exp(-thetaTX))
 
 
 def test():
