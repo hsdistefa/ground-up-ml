@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
-from supervised.neural_network import NeuralNetwork
+from neuralnetwork.layers import Activation, FullyConnected
+from neuralnetwork.neural_network import NeuralNetwork
 
 import numpy as np
 
@@ -20,8 +21,8 @@ if __name__ == '__main__':
     nn = NeuralNetwork(learning_rate=.01)
     n_hidden_nodes = 2
 
-    nn.add(np.shape(X_train)[1], n_hidden_nodes)
-    nn.add(n_hidden_nodes, len(np.unique(y_train)))
+    nn.add(FullyConnected(n_hidden_nodes, np.shape(X_train)[1]))
+    nn.add(Activation(len(np.unique(y_train))))
 
     # Train network and get test predictions
     nn.fit(X_train, y_train, 200)
