@@ -49,6 +49,7 @@ class LinearRegression():
 
         # Initialize weights
         self.w = np.random.randn(np.shape(X)[1])  # Could use truncated normal
+
         # Least squares gradient descent
         if self.gradient_descent:
             for _ in range(self.num_iterations):
@@ -82,9 +83,7 @@ class LinearRegression():
 
             # Compute psuedoinverse of X^TX plus regularization term
             XTX = np.dot(X.T, X) + self.reg_term * reg_eye
-            U, S, V = np.linalg.svd(XTX)
-            S = np.diag(S)
-            XTX_inv = V.dot(np.linalg.pinv(S)).dot(U.T)
+            XTX_inv = _pseudoinverse(XTX)
 
             # Compute weights using characteristic equation
             self.w = XTX_inv.dot(X.T).dot(y)
@@ -103,3 +102,11 @@ class LinearRegression():
         # Append same bias weights to new input
         X = np.insert(X, 0, 1, axis=1)
         return X.dot(self.w)
+
+
+def _pseudoinverse(X):
+    U, S, V = np.linalg.svd(X)
+    S = np.diag(S)
+    X_inv = V.dot(np.linalg.pinv(S)).dot(U.T)
+
+    return X_inv
