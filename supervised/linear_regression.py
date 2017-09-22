@@ -12,24 +12,28 @@ class LinearRegression():
         learning_rate (:obj: `float`, optional):
             Step magnitude used for updating the weights when doing gradient
             descent.
-        gradient_descent (bool):
+        gradient_descent (:obj: `bool`, optional):
             If True do gradient descent, else get exact solution using
             least squares normal equation.
-        stochastic (bool):
+        stochastic (:obj: `bool`, optional):
             If True and doing gradient descent, computes the loss on a random
             subsample of the input at each step.
-        batch_size (int):
+        batch_size (:obj: `int`, optional):
             The number of samples to use for computing the loss at each step
             when using stochastic gradient descent.
+        reg_term (:obj: `float`, optional)
+            The regularization constant to use to penalize larger weights.
     """
     def __init__(self, num_iterations=100, learning_rate=.001,
-                 gradient_descent=True, stochastic=False, batch_size=32):
+                 gradient_descent=True, stochastic=False, batch_size=32,
+                 reg_term=0.0):
         self.w = None
         self.num_iterations = num_iterations
         self.learning_rate = learning_rate
         self.gradient_descent = gradient_descent
         self.stochastic = stochastic
         self.batch_size = batch_size
+        self.reg_term = reg_term
 
     def fit(self, X, y):
         """Fit given training data to a linear model using regression
@@ -61,17 +65,28 @@ class LinearRegression():
                     labels = y
 
                 # Compute gradient w.r.t. weights of squared error function
+                # including regularization term to penalize large weights
+                # which may cause overfitting
                 loss = np.dot(x, self.w) - labels
-                gradient = np.dot(x.T, loss)
+                gradient = np.dot(x.T, loss) + self.reg_term * self.w
+
                 # Update weights in the direction that minimizes loss
                 self.w -= self.learning_rate * gradient
 
         # Least Squares normal equation
         else:
             # Note: slow for large matrices
-            U, S, V = np.linalg.svd(X.T.dot(X))
+
+            reg_eye = np.eye(np.shape(X)[1])
+            reg_eye[0][0] = 0  # Don't regularize bias term
+
+            # Compute psuedoinverse of X^TX plus regularization term
+            XTX = np.dot(X.T, X) + self.reg_term * reg_eye
+            U, S, V = np.linalg.svd(XTX)
             S = np.diag(S)
             XTX_inv = V.dot(np.linalg.pinv(S)).dot(U.T)
+
+            # Compute weights using characteristic equation
             self.w = XTX_inv.dot(X.T).dot(y)
 
     def predict(self, X):

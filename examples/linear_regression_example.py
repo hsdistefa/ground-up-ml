@@ -25,7 +25,7 @@ if __name__ == '__main__':
     y_gd_pred = lr_gd.predict(X_test)
 
     # Run normal model
-    lr_pi = LinearRegression(gradient_descent=False)
+    lr_pi = LinearRegression(gradient_descent=False, reg_term=10)
     lr_pi.fit(X_train, y_train)
     y_pi_pred = lr_pi.predict(X_test)
 
