@@ -42,9 +42,9 @@ class ICA():
 
                 w1 /= np.sqrt((w1**2).sum())
 
-                cost = np.abs(np.abs((w1 * w).sum()) - 1)
+                loss = np.abs(np.abs((w1 * w).sum()) - 1)
                 w = w1
-                if cost < self.tolerance:
+                if loss < self.tolerance:
                     break
 
             W[i, :] = w

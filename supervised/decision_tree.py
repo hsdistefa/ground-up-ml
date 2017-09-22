@@ -145,22 +145,3 @@ class DecisionTree():
             info_gain -= p[i]*self._entropy(split)
 
         return info_gain
-
-
-def test():
-    # TODO: better testing
-    # AND function
-    X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-    y = np.array([0, 0, 0, 1])
-    test = np.array([[0, 1], [1, 1], [1, 0], [1, 0], [0, 0], [1, 1]])
-
-    print('train input', X)
-    dt = DecisionTree()
-    dt.fit(X, y)
-    print('train labels', y)
-    print('test input', test)
-    print(dt)
-    print('prediction', dt.predict(test))
-
-if __name__ == '__main__':
-    test()

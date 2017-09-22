@@ -2,9 +2,7 @@ from __future__ import division, print_function
 
 import math
 
-import matplotlib.pyplot as plt
 import numpy as np
-from sklearn import datasets
 
 
 class PCA():
@@ -64,27 +62,3 @@ class PCA():
 
         # Project input onto the n principal components
         return X.dot(PC)
-
-
-def test():
-    # Get Data
-    data = datasets.load_digits()
-    X = data.data
-    y = data.target
-
-    # Transform
-    pca = PCA(svd=False)
-    X_transformed = pca.transform(X, 2)
-    pc1 = X_transformed[:, 0]
-    pc2 = X_transformed[:, 1]
-
-    # Plot
-    plt.scatter(pc1, pc2, c=y)
-    plt.title('Digits Dataset 0-9')
-    plt.xlabel('Principal Component 1')
-    plt.ylabel('Principal Component 2')
-    plt.show()
-
-
-if __name__ == '__main__':
-    test()
