@@ -15,5 +15,6 @@ setuptools.setup(
     author='Harrison DiStefano',
     url='https://github.com/hsdistefa/ground-up-ml',
     install_requires=requirements,
+    setup_requires=['numpy>=1.10', 'scipy>=0.18'],
     packages=setuptools.find_packages()
 )
