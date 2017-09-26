@@ -35,6 +35,13 @@ class DecisionNode():
 
 
 class DecisionTree():
+    """Decision Tree
+
+    Args:
+        max_depth (:obj: `int`, optional):
+            Maximum depth to allow the decision tree to be built to.
+
+    """
     def __init__(self, max_depth=None, root=None):
         self.root = root
         if max_depth is None:
@@ -46,11 +53,29 @@ class DecisionTree():
         return self.root._print_tree('', True)
 
     def fit(self, X, y):
-        # Build tree
+        """Builds a decision tree according to the training data
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Training data
+            y (numpy array of shape [n_samples]):
+                Training labels
+        """
         self.n_samples, self.n_features = np.shape(X)
         self.root = self.id3(X, y)
 
     def predict(self, X):
+        """Predict the labels of the given test data using the fitted decision
+        tree
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Test data
+
+        Returns:
+            C (numpy array of shape [n_samples]):
+                Predicted values from test data
+        """
         predictions = np.zeros(np.shape(X)[0])
         for i, sample in enumerate(X):
             predictions[i] = self.predict_sample(sample)
@@ -71,6 +96,19 @@ class DecisionTree():
         return y_pred
 
     def id3(self, X, y, features=None, depth=0):
+        """Construct a decision tree using the ID3 algorithm, where each feature
+        split is chosen by maximizing information gain.
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Test data
+            y (numpy array of shape [n_samples]):
+                Test labels
+
+        Returns:
+            N (DecisionNode):
+                The root node of the fitted decision tree
+        """
         depth += 1
 
         # Instantiate feature list at root
