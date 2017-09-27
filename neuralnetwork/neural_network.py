@@ -4,6 +4,12 @@ import numpy as np
 
 
 class NeuralNetwork():
+    """Neural Network
+
+    Args:
+        learning_rate (:obj: `float`, optional):
+            Step magnitude used for updating layer weights when relevant.
+    """
     def __init__(self, learning_rate=.01):
         self.learning_rate = learning_rate
         self.network = []
@@ -13,12 +19,21 @@ class NeuralNetwork():
             prev_layer_n_nodes = self.network[-1].n_nodes
             layer.set_n_inputs(prev_layer_n_nodes)
 
-        if hasattr(layer, 'learning_rate'):
-            layer.set_learning_rate(self.learning_rate)
+        layer.set_learning_rate(self.learning_rate)
 
         self.network.append(layer)
 
     def fit(self, X, y, n_epochs):
+        """Fit the Neural Network to the given training data
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Training data
+            y (numpy array of shape [n_samples]):
+                Training labels
+            n_epochs (int):
+                Number of rounds of training to do over the input data.
+        """
         self.n_samples, self.n_features = np.shape(X)
         self.n_output_nodes = len(np.unique(y))
 
@@ -37,8 +52,17 @@ class NeuralNetwork():
             self._epoch_summary(epoch_i, y, predictions)
 
     def predict(self, X):
-        """Returns 1-hot encoded class labels predicted by the neural network
+        """Predict given test data using the Neural Network
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Test data
+
+        Returns:
+            C (numpy array of shape [n_samples, n_classes]):
+                Predicted values from test data
         """
+        # Predictions are in 1-hot encoded form
         return self._forward_propogate(X)
 
     def _back_propogate(self, gradient):

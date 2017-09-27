@@ -2,8 +2,13 @@ import numpy as np
 
 
 class Layer(object):
+    """Base class for a neural network Layer class.
+    """
     def set_n_inputs(self, n_inputs):
         self.n_inputs = n_inputs
+
+    def set_learning_rate(self, learning_rate):
+        self.learning_rate = None
 
     def forward_propogate(self, X):
         raise NotImplementedError()
@@ -15,6 +20,14 @@ class Layer(object):
 class FullyConnected(Layer):
     """Neural network layer where each node is connected to every node in
     the next layer
+
+    Args:
+        n_nodes (int):
+            The number of neural nodes to include in the layer
+        n_inputs (:obj: `int`, optional):
+            The number of nodes in the previous layer or if the layer is an
+            input layer, the number of features in the input data. Required
+            argument when adding the first layer, i.e. the input layer.
     """
     def __init__(self, n_nodes, n_inputs=None):
         self.n_nodes = n_nodes
@@ -24,6 +37,7 @@ class FullyConnected(Layer):
         self.inputs = None
         self.outputs = None
 
+    # Override superclass method
     def set_learning_rate(self, learning_rate):
         self.learning_rate = learning_rate
 
@@ -58,6 +72,14 @@ class FullyConnected(Layer):
 class Activation(Layer):
     """Neural network layer that computes an activation function on its input
     before passing it on to the next layer
+
+    Args:
+        n_nodes (int):
+            The number of neural nodes to include in the layer
+        n_inputs (:obj: `int`, optional):
+            The number of nodes in the previous layer or if the layer is an
+            input layer, the number of features in the input data. Required
+            argument when adding the first layer, i.e. the input layer.
     """
     def __init__(self, n_nodes, n_inputs=None):
         self.n_nodes = n_nodes
