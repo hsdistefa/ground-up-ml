@@ -29,6 +29,10 @@ COPY supervised /ground-up-ml/supervised
 
 COPY unsupervised /ground-up-ml/unsupervised
 
+COPY neuralnetwork /ground-up-ml/neuralnetwork
+
+COPY examples /ground-up-ml/examples
+
 # Set up jupyter notebook config
 COPY docker/jupyter_config.py /root/.jupyter/
 
