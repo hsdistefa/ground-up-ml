@@ -12,11 +12,15 @@ class LogisticRegression():
         learning_rate (:obj: `float`, optional):
             Step magnitude used for updating the weights during gradient
             descent.
+        threshold (:obj: `float`, optional):
+            Cut-off value between 0 and 1 model confidence for labeling a
+            prediction positive or negative
     """
-    def __init__(self, num_iterations=100, learning_rate=.001):
+    def __init__(self, num_iterations=100, learning_rate=0.001, threshold=0.5):
         self.num_iterations = num_iterations
         self.w = None
         self.learning_rate = learning_rate
+        self.threshold = threshold
 
     def fit(self, X, y):
         """Fit given training data to a logistic model using regression
@@ -55,8 +59,16 @@ class LogisticRegression():
         """
         # Add bias weights to input
         X = np.insert(X, 0, 1, axis=1)
+        # Compute soft predictions
+        soft_predictions = self._sigmoid(np.dot(X, self.w))
         # Round model prediction to nearest class
-        return np.round(self._sigmoid(X.dot(self.w))).astype(np.int32)
+        y_pred = _threshold_predictions(soft_predictions, self.threshold)
+
+        return y_pred
 
     def _sigmoid(self, thetaTX):
         return 1.0 / (1.0 + np.exp(-thetaTX))
+
+
+def _threshold_predictions(soft_predictions, threshold):
+    return np.where(soft_predictions >= threshold, 1, 0)
