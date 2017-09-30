@@ -2,6 +2,8 @@ from __future__ import division, print_function
 
 import numpy as np
 
+from utils.functions import euclidean_distance
+
 
 class KMeans():
     """K Means
@@ -68,7 +70,7 @@ class KMeans():
             closest_dist = float('inf')
             closest_index = None
             for j, c in enumerate(centroids):
-                dist = self._euclidean_distance(x, c)
+                dist = euclidean_distance(x, c)
                 if dist < closest_dist:
                     closest_dist = dist
                     closest_index = j
@@ -132,7 +134,7 @@ class KMeans():
             for i, x in enumerate(X):
                 closest_dist = float('inf')
                 for c in centroids:
-                    dist = self._euclidean_distance(x, c)
+                    dist = euclidean_distance(x, c)
                     if dist < closest_dist:
                         closest_dist = dist
                 prob = closest_dist**2
@@ -155,6 +157,3 @@ class KMeans():
         centroids = self._get_new_centroids(X, clusters)
 
         return centroids
-
-    def _euclidean_distance(self, x1, x2):
-        return np.linalg.norm(x1 - x2)

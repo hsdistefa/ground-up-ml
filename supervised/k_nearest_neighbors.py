@@ -3,6 +3,8 @@ from __future__ import division, print_function
 import numpy as np
 import scipy.stats
 
+from utils.functions import euclidean_distance
+
 
 class KNN():
     def __init__(self, k, method):
@@ -46,7 +48,7 @@ class KNN():
 
             max_neighbor_i = 0
             for (j, train_sample) in enumerate(X_train):
-                dist = self._euclidean_distance(test_sample, train_sample)
+                dist = euclidean_distance(test_sample, train_sample)
                 if dist < knn_dist[max_neighbor_i]:
                     knn_dist[max_neighbor_i] = dist
                     knn_labels[max_neighbor_i] = y_train[j]
@@ -65,6 +67,3 @@ class KNN():
             predictions = np.mean(labels_matrix, axis=1)
 
         return predictions
-
-    def _euclidean_distance(self, x1, x2):
-        return np.linalg.norm(x1 - x2)

@@ -41,8 +41,8 @@ class LinearRegression():
         Args:
             X (numpy array of shape [n_samples, n_features]):
                 Training data
-            y (numpy array of shape [n_samples]:
-                Labels
+            y (numpy array of shape [n_samples]):
+                Training labels
         """
         # Append bias weights to input
         X = np.insert(X, 0, 1, axis=1)
@@ -105,6 +105,8 @@ class LinearRegression():
 
 
 def _pseudoinverse(X):
+    """Calculate the pseudoinverse of a matrix
+    """
     U, S, V = np.linalg.svd(X)
     S = np.diag(S)
     X_inv = V.dot(np.linalg.pinv(S)).dot(U.T)

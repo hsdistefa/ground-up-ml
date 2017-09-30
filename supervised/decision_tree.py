@@ -2,10 +2,10 @@
 
 from __future__ import division, print_function
 
-import math
-
 import numpy as np
 import scipy.stats
+
+from utils.functions import information_gain
 
 
 class DecisionNode():
@@ -138,7 +138,7 @@ class DecisionTree():
             splits = [y[values == label] for label in labels]
 
             # Calculate information gain for splitting on feature
-            info_gain = self._information_gain(y, splits)
+            info_gain = information_gain(splits)
 
             # Update maximum information gain
             if info_gain > max_gain:
@@ -160,26 +160,3 @@ class DecisionTree():
             branches.append(branch)
 
         return DecisionNode(feature_index=best_feature, children=branches)
-
-    def _entropy(self, y):
-        # NOTE: Be careful of floating point arithmetic error
-        # Get the possible classes and number of occurences for each
-        labels, counts = np.unique(y, return_counts=True)
-
-        # Calculate entropy in bits (shannons)
-        p = counts / np.float32(len(y))  # Proportion of each class i in set y
-        entropy = 0
-        for i, label in enumerate(labels):
-            entropy += -p[i] * math.log(p[i]) / math.log(2)
-        return entropy
-
-    def _information_gain(self, y, splits):
-        # Get proportion for each split of y
-        p = np.array([len(a) for a in splits]) / np.float32(len(y))
-
-        # Calculate information gain for given splits
-        info_gain = self._entropy(y)
-        for i, split in enumerate(splits):
-            info_gain -= p[i]*self._entropy(split)
-
-        return info_gain

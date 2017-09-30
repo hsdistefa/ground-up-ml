@@ -2,6 +2,8 @@ from __future__ import division, print_function
 
 import numpy as np
 
+from utils.functions import sigmoid
+
 
 class LogisticRegression():
     """Logistic Regression
@@ -41,7 +43,7 @@ class LogisticRegression():
 
         for _ in range(self.num_iterations):
             # Gradient descent
-            h_x = self._sigmoid(X.dot(self.w))
+            h_x = sigmoid(X.dot(self.w))
             gradient = X.T.dot(h_x - y)
             self.w -= self.learning_rate * gradient
             # TODO: implement batch optimization
@@ -60,14 +62,11 @@ class LogisticRegression():
         # Add bias weights to input
         X = np.insert(X, 0, 1, axis=1)
         # Compute soft predictions
-        soft_predictions = self._sigmoid(np.dot(X, self.w))
+        soft_predictions = sigmoid(np.dot(X, self.w))
         # Round model prediction to nearest class
         y_pred = _threshold_predictions(soft_predictions, self.threshold)
 
         return y_pred
-
-    def _sigmoid(self, thetaTX):
-        return 1.0 / (1.0 + np.exp(-thetaTX))
 
 
 def _threshold_predictions(soft_predictions, threshold):
