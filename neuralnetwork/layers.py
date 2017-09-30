@@ -35,7 +35,6 @@ class FullyConnected(Layer):
         self.weights, self.bias = self._init_weights()
         self.learning_rate = None
         self.inputs = None
-        self.outputs = None
 
     # Override superclass method
     def set_learning_rate(self, learning_rate):
@@ -44,9 +43,9 @@ class FullyConnected(Layer):
     def forward_propogate(self, X):
         # Gives the output of each neuron to be sent to the next layer
         self.inputs = X
-        self.outputs = np.dot(X, self.weights) + self.bias
+        outputs = np.dot(X, self.weights) + self.bias
 
-        return self.outputs
+        return outputs
 
     def back_propogate(self, gradient):
         # Calculate gradients w.r.t. layer weights
@@ -75,34 +74,25 @@ class Activation(Layer):
 
     Args:
         n_nodes (int):
-            The number of neural nodes to include in the layer
-        n_inputs (:obj: `int`, optional):
-            The number of nodes in the previous layer or if the layer is an
-            input layer, the number of features in the input data. Required
-            argument when adding the first layer, i.e. the input layer.
+            Number of neural nodes to include in the layer
+        activation_function (:obj: `ActivationFunction`, optional):
+            Function to use for activation computations.
     """
-    def __init__(self, n_nodes, n_inputs=None):
+    def __init__(self, n_nodes, activation_func=Sigmoid):
         self.n_nodes = n_nodes
-        self.n_inputs = n_inputs
-        self.activations = None
+        self.activation_func = activation_function
+        self.inputs = None
 
     def forward_propogate(self, X):
         # Gives the activation output of each neuron to be sent to the next
         # layer
-        self.activations = _sigmoid(X)
+        self.inputs = X
+        activations = self.activation_function(self.inputs)
 
-        return self.activations
+        return activations
 
     def back_propogate(self, gradient):
         # Calculate activation gradient
-        a_gradient = gradient * _sigmoid_derivative(self.activations)
+        a_gradient = gradient * self.activation_func.gradient(self.inputs)
 
         return a_gradient
-
-
-def _sigmoid_derivative(z):
-    return _sigmoid(z) * (1.0 - _sigmoid(z))
-
-
-def _sigmoid(z):
-    return 1.0 / (1.0 + np.exp(-z))
