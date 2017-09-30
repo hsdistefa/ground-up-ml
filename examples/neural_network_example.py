@@ -22,7 +22,7 @@ if __name__ == '__main__':
     n_hidden_nodes = 2
 
     nn.add(FullyConnected(n_hidden_nodes, np.shape(X_train)[1]))
-    nn.add(Activation(len(np.unique(y_train))))
+    nn.add(Activation(len(np.unique(y_train)), activation_func='sigmoid'))
 
     # Train network and get test predictions
     nn.fit(X_train, y_train, 200)

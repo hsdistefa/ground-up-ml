@@ -1,5 +1,7 @@
 from __future__ import division, print_function
 
+from enum import Enum
+
 import numpy as np
 
 
@@ -9,7 +11,7 @@ class ActivationFunction(object):
     def __call__(self):
         raise NotImplementedError()
 
-    def _gradient(self):
+    def gradient(self):
         raise NotImplementedError()
 
 
@@ -29,4 +31,9 @@ class Sigmoid(ActivationFunction):
         return self.__call__(x) * (1.0 - self.__call__(x))
 
 
-
+class ActFunctions(Enum):
+    """Enum to allow translation between string name arguments and the
+    respective activation function class
+    """
+    sigmoid = Sigmoid()
+    relu = ReLU()

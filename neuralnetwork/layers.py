@@ -1,5 +1,7 @@
 import numpy as np
 
+from neuralnetwork.activation_functions import ActFunctions, ReLU, Sigmoid
+
 
 class Layer(object):
     """Base class for a neural network Layer class.
@@ -75,19 +77,21 @@ class Activation(Layer):
     Args:
         n_nodes (int):
             Number of neural nodes to include in the layer
-        activation_function (:obj: `ActivationFunction`, optional):
-            Function to use for activation computations.
+        activation_function (str):
+            Name of function to use for activation computations:
+                sigmoid: Sigmoid activation
+                relu: Rectified Linear Unit
     """
-    def __init__(self, n_nodes, activation_func=Sigmoid):
+    def __init__(self, n_nodes, activation_func):
         self.n_nodes = n_nodes
-        self.activation_func = activation_function
+        self.activation_func = ActFunctions[activation_func].value
         self.inputs = None
 
     def forward_propogate(self, X):
         # Gives the activation output of each neuron to be sent to the next
         # layer
         self.inputs = X
-        activations = self.activation_function(self.inputs)
+        activations = self.activation_func(self.inputs)
 
         return activations
 
