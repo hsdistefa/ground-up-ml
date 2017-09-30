@@ -31,6 +31,8 @@ COPY unsupervised /ground-up-ml/unsupervised
 
 COPY neuralnetwork /ground-up-ml/neuralnetwork
 
+COPY utils /ground-up-ml/utils
+
 COPY examples /ground-up-ml/examples
 
 # Set up jupyter notebook config
