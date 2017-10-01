@@ -25,15 +25,7 @@ RUN pip --no-cache-dir install \
         && \
     python -m ipykernel.kernelspec
 
-COPY supervised /ground-up-ml/supervised
-
-COPY unsupervised /ground-up-ml/unsupervised
-
-COPY neuralnetwork /ground-up-ml/neuralnetwork
-
-COPY utils /ground-up-ml/utils
-
-COPY examples /ground-up-ml/examples
+COPY groundupml /groundupml
 
 # Set up jupyter notebook config
 COPY docker/jupyter_config.py /root/.jupyter/
