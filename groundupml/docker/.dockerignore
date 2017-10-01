@@ -1,0 +1,12 @@
+.ropeproject/
+.git
+.gitignore
+Dockerfile
+README.md
+todos.txt
+TODO.md
+*.pyc
+
+# To prevent storing dev/temporary container data
+*.csv
+/tmp/*
