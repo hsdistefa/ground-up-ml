@@ -1,24 +1,29 @@
 from __future__ import division, print_function
 
 import numpy as np
+import sklearn.datasets
 
 from groundupml.supervised.naive_bayes import NaiveBayes
+from groundupml.utils.data_manipulation import split_data
 
 
 if __name__ == '__main__':
-    # TODO: better testing
-    X = np.array([[.75, .32, 1.8],
-                  [1.76, 2.0, .22],
-                  [.68, .36, 1.9]])
-    y = np.array([1, 0, 1])
+    np.random.seed(seed=2)
 
-    test = np.array([[.7, .3, 2],
-                     [1.7, 1.9, .2],
-                     [.7, .3, 2.2]])
+    # Load dataset
+    iris = sklearn.datasets.load_iris()
+    X = iris.data
+    y = iris.target
 
+    # Shuffle and split data
+    X_train, y_train, X_test, y_test = split_data(X, y)
+
+    # Run the model
     nb = NaiveBayes()
-    nb.fit(X, y)
-    print(X)
-    print(y)
-    print(test)
-    print(nb.predict(test))
+    nb.fit(X_train, y_train)
+    y_pred = nb.predict(X_test)
+
+    # Compute error
+    error = len(y_test[y_test != y_pred]) / float(len(y_test))
+    accuracy = 1 - error
+    print('Accuracy: {:.2f}%'.format(accuracy * 100))

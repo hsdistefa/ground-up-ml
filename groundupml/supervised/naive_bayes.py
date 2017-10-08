@@ -52,7 +52,7 @@ class NaiveBayes():
                 Predicted class labels for test data
         """
         # Choose the label that maximizes the naive posterior probability
-        predictions = np.empty(self.n_samples)
+        predictions = np.zeros(np.shape(X)[0])
         for i, sample in enumerate(X):
             max_prob = float('-inf')
             max_label_i = None
