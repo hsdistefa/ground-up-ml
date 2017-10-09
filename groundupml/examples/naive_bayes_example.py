@@ -24,6 +24,6 @@ if __name__ == '__main__':
     y_pred = nb.predict(X_test)
 
     # Compute error
-    error = len(y_test[y_test != y_pred]) / float(len(y_test))
+    error = np.sum(y_test != y_pred) / float(len(y_test))
     accuracy = 1 - error
     print('Accuracy: {:.2f}%'.format(accuracy * 100))

@@ -6,6 +6,7 @@ import sklearn.datasets
 
 from groundupml.supervised.logistic_regression import LogisticRegression
 from groundupml.unsupervised.pca import PCA
+from groundupml.utils.data_manipulation import split_data
 
 
 if __name__ == '__main__':
@@ -22,19 +23,8 @@ if __name__ == '__main__':
     y[y == 1] = 0
     y[y == 2] = 1
 
-    # Shuffle data
-    y = y[np.newaxis].T
-    stacked = np.hstack((X, y))
-    np.random.shuffle(stacked)
-    X = stacked[:, :stacked.shape[1]-1]
-    y = stacked[:, stacked.shape[1]-1]
-
-    # Split into test and training sets
-    split_index = int(.7*len(data))
-    X_train = X[:split_index]
-    y_train = y[:split_index]
-    X_test = X[split_index:]
-    y_test = y[split_index:]
+    # Shuffle and split into test and training sets
+    X_train, y_train, X_test, y_test = split_data(X, y, proportion=0.7)
 
     # Run the model
     clf = LogisticRegression()

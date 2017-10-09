@@ -5,6 +5,7 @@ import numpy as np
 from sklearn import datasets
 
 from groundupml.supervised.linear_regression import LinearRegression
+from groundupml.utils.data_manipulation import split_data
 
 
 if __name__ == '__main__':
@@ -14,11 +15,7 @@ if __name__ == '__main__':
     X, y = datasets.make_regression(n_features=1, n_samples=NUM_SAMPLES,
                                     bias=50, noise=20, random_state=7901)
     # Split into test and training sets
-    split_index = int(.7*NUM_SAMPLES)
-    X_train = X[:split_index]
-    y_train = y[:split_index]
-    X_test = X[split_index:]
-    y_test = y[split_index:]
+    X_train, y_train, X_test, y_test = split_data(X, y, proportion=0.7)
 
     # Run gradient descent model
     lr_gd = LinearRegression(stochastic=True)
