@@ -4,7 +4,7 @@
 ### Overview
 **K-Means Clustering** is a form of unsupervised learning. The goal of unsupervised learning is to classify data into meaningful clusters without any labels--it is attempting to say "these should be in one group and those should be in another" without being given any clue as to what a "group" should be.
 
-How is it decided how many of these groups the data should be placed? Some unsupervised machine learning algorithms, such as **DBSCAN**, decide themselves; however, in K-Means the number of groups needs to be specified beforehand. That's what **K** stands for--the number of groups into which to separate the data, where each group is centered around a **mean**, as in the average of the points in that group.
+How is it decided into how many of these groups the data should be placed? Some unsupervised machine learning algorithms, such as **DBSCAN**, decide themselves; however, in K-Means the number of groups needs to be specified beforehand. That's what **K** stands for--the number of groups into which to separate the data, where each group is centered around a **mean**, as in the average of the points in that group.
 
 Here is an example of 3-Means Clustering in action:
 
