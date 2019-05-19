@@ -2,6 +2,9 @@ from __future__ import print_function, division
 
 import numpy as np
 
+from groundupml.utils.functions import to_one_hot, one_hot_to_hard_pred
+from groundupml.utils.data_manipulation import shuffle_data
+
 
 class NeuralNetwork():
     """Neural Network
@@ -19,6 +22,7 @@ class NeuralNetwork():
             prev_layer_n_nodes = self.network[-1].n_nodes
             layer.set_n_inputs(prev_layer_n_nodes)
 
+        layer.init_weights()  # Initializes weights if layer has them
         layer.set_learning_rate(self.learning_rate)
 
         self.network.append(layer)
@@ -38,9 +42,12 @@ class NeuralNetwork():
         self.n_output_nodes = len(np.unique(y))
 
         # Convert training labels to one-hot encoding
-        y = _to_1_hot(y)
+        y = to_one_hot(y)
 
         for epoch_i in range(n_epochs):
+            # Shuffle data so it is different order each epoch
+            X, y = shuffle_data(X, y)
+
             # Get predictions by propogating input forward through network
             predictions = self._forward_propogate(X)
 
@@ -84,8 +91,10 @@ class NeuralNetwork():
     def _epoch_summary(self, epoch_i, y, predictions):
         fs = 'epoch {}, learning rate: {}, error: {:.3f}'
 
-        hard_pred = np.zeros_like(predictions)
-        hard_pred[np.arange(len(predictions)), predictions.argmax(1)] = 1
+        hard_pred = one_hot_to_hard_pred(predictions)
+        print(hard_pred)
+        for i, layer in enumerate(self.network):
+            print('layer', i, layer.weights)
         error = 1 - (np.sum(np.all(y == hard_pred, axis=1)) / float(len(y)))
 
         print(fs.format(epoch_i+1, self.learning_rate, error))
@@ -93,10 +102,3 @@ class NeuralNetwork():
     def _gradient_check(self, weights, gradients):
         # TODO: gradient checking
         pass
-
-
-def _to_1_hot(a):
-    one_hot = np.zeros((a.size, a.max()+1))  # Might be slow for large input
-    one_hot[np.arange(a.size), a] = 1
-
-    return one_hot

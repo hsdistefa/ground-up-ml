@@ -67,3 +67,24 @@ def sigmoid(x):
     """Calculate sigmoid function element-wise on a tensor
     """
     return 1.0 / (1.0 + np.exp(-x))
+
+
+def to_one_hot(a):
+    one_hot = np.zeros((a.size, a.max()+1))  # Might be slow for large input
+    one_hot[np.arange(a.size), a] = 1
+
+    return one_hot
+
+
+def one_hot_to_hard_pred(pred):
+    hard_pred = np.zeros_like(pred)
+    hard_pred[np.arange(len(pred)), pred.argmax(1)] = 1
+
+    return hard_pred
+
+
+def one_hot_to_class(one_hot):
+    hard_pred = one_hot_to_hard_pred(one_hot)
+    class_pred = np.where(hard_pred == 1)[1]
+
+    return class_pred

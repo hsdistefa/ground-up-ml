@@ -1,31 +1,36 @@
 from __future__ import division, print_function
 
 import numpy as np
+from sklearn import datasets
 
 from groundupml.neuralnetwork.layers import Activation, FullyConnected
 from groundupml.neuralnetwork.neural_network import NeuralNetwork
+from groundupml.utils.data_manipulation import split_data
+from groundupml.utils.functions import one_hot_to_class
 
 
 if __name__ == '__main__':
     np.random.seed(100)
 
     # Set up data
-    X_train = np.array([[2.6, 2.5], [8, 0.3], [3, 3], [3, 4], [1.4, 1.8],
-                        [6.3, 1.0], [8.5, -0.2], [1.5, 2.4], [7, 3], [7, 0.5]])
-    y_train = np.array([0, 1, 0, 0, 0, 1, 1, 0, 1, 1])
-
-    X_test = np.array([[3.1, 3.3], [2.8, 3.7], [7.2, 0]])
-    y_test = np.array([0, 0, 1])
+    digits = datasets.load_digits()
+    X = digits.data
+    y = digits.target
+    X_train, y_train, X_test, y_test = split_data(X, y)
 
     # Set up neural network
-    # NOTE: this network only has one hidden layer
     nn = NeuralNetwork(learning_rate=.01)
-    n_hidden_nodes = 2
+    n_input_nodes = np.shape(X_train)[1]
+    n_hidden_nodes = 30
+    n_output_nodes = len(np.unique(y_train))
 
-    nn.add(FullyConnected(n_hidden_nodes, np.shape(X_train)[1]))
-    nn.add(Activation(len(np.unique(y_train)), 'sigmoid'))
+    nn.add(FullyConnected(n_hidden_nodes, n_input_nodes))
+    nn.add(FullyConnected(n_output_nodes))
+    #nn.add(Activation('sigmoid'))
 
     # Train network and get test predictions
-    nn.fit(X_train, y_train, 200)
-    print('predictions: ', nn.predict(X_test))
+    nn.fit(X_train, y_train, 1)
+    pred = nn.predict(X_test)
+    print('predictions: ', pred[:10])
+    print('predictions hard: ', one_hot_to_class(pred))
     print('actual: ', y_test)

@@ -18,6 +18,9 @@ class Layer(object):
     def back_propogate(self, gradient):
         raise NotImplementedError()
 
+    def init_weights(self):
+        pass
+
 
 class FullyConnected(Layer):
     """Neural network layer where each node is connected to every node in
@@ -34,7 +37,8 @@ class FullyConnected(Layer):
     def __init__(self, n_nodes, n_inputs=None):
         self.n_nodes = n_nodes
         self.n_inputs = n_inputs
-        self.weights, self.bias = self._init_weights()
+        self.weights = None
+        self.bias = None
         self.learning_rate = None
         self.inputs = None
 
@@ -60,14 +64,14 @@ class FullyConnected(Layer):
 
         return np.dot(gradient, self.weights.T)
 
-    def _init_weights(self):
+    # Override
+    def init_weights(self):
         # Initialize weights
         # Add bias weight for input to each neuron
-        W = np.random.randn(self.n_inputs, self.n_nodes) / \
+        print('initializing weights')
+        self.weights = np.random.randn(self.n_inputs, self.n_nodes) / \
             np.sqrt(self.n_inputs)
-        b = np.zeros((1, self.n_nodes))
-
-        return W, b
+        self.bias = np.zeros((1, self.n_nodes))
 
 
 class Activation(Layer):
@@ -77,15 +81,21 @@ class Activation(Layer):
     Args:
         n_nodes (int):
             Number of neural nodes to include in the layer
-        activation_function (str):
+        activation_func (str):
             Name of function to use for activation computations:
                 sigmoid: Sigmoid activation
                 relu: Rectified Linear Unit
     """
-    def __init__(self, n_nodes, activation_func):
-        self.n_nodes = n_nodes
+    def __init__(self, activation_func):
+        self.n_inputs = None
+        self.n_nodes = None
         self.activation_func = ActFunctions[activation_func].value
         self.inputs = None
+
+    # Override superclass method
+    def set_n_inputs(self, n_inputs):
+        self.n_inputs = n_inputs
+        self.n_nodes = n_inputs
 
     def forward_propogate(self, X):
         # Gives the activation output of each neuron to be sent to the next
