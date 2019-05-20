@@ -12,24 +12,22 @@ class LDA():
         self.w = None
 
     def fit(self, X, y):
-        n_samples, n_features = X.shape
-
         # For each class calculate the covariance matrix and mean of
         # the samples for that class
-        classes = np.unique(y)
-        covariance_total = np.zeros(shape=(n_features, n_features))
-        mean_diff = np.zeros(shape=n_features)
-        for class_n in classes:
-            # Separate the data by class
-            X_n = X[y == class_n]
 
-            # Only need the total sum covariance matrix
-            covariance = X_n.T.dot(X_n) / (n_samples - 1)
-            covariance_total += covariance
+        # Separate the data by class
+        X_C1 = X[y == 0]
+        X_C2 = X[y == 1]
 
-            # Keep track of the differences between the means
-            mean_n = X_n.mean(axis=0)
-            mean_diff = np.atleast_1d(mean_diff - mean_n)
+        # Calculate the mean of each class
+        mean_c1 = X_C1.mean(axis=0)
+        mean_c2 = X_C2.mean(axis=0)
+        mean_diff = np.atleast_1d(mean_c1 - mean_c2)
+
+        # Calculate the total covariance matrix for each class
+        covariance_c1 = self._calculate_covariance_matrix(X_C1)
+        covariance_c2 = self._calculate_covariance_matrix(X_C2)
+        covariance_total = covariance_c1 + covariance_c2
 
         # Determine the weight vector w that maximizes the projected distance
         # between the total mean and the covariance for each class
@@ -46,3 +44,11 @@ class LDA():
             y_pred[i] = y
 
         return y_pred
+
+    def _calculate_covariance_matrix(self, X):
+        n_samples = X.shape[0]
+
+        # Center X around its mean
+        X = X - X.mean(axis=0)
+
+        return X.T.dot(X) / (n_samples - 1)
