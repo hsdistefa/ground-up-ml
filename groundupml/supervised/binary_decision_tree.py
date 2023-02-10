@@ -130,14 +130,8 @@ class DecisionTree():
             if features.mask[feature_i] == True:  
                 continue
 
-            # Calculate the probability of seeing each value of feature i
             values = X[:, feature_i]
-
-            _, value_counts = np.unique(values, return_counts=True)
-            probs = value_counts / np.float32(len(values))
-
-            # Calculate information gain
-            info_gain = 1 + np.sum(probs*np.log2(probs))
+            info_gain = self._information_gain(values)
             if info_gain > max_gain:
                 max_gain = info_gain
                 best_feature_i = feature_i
@@ -173,8 +167,18 @@ class DecisionTree():
             return None
         return unique[counts.argmax()]
 
+    def _information_gain(self, values):
+        # Calculate the probability of seeing each value of feature i
+        _, value_counts = np.unique(values, return_counts=True)
+        probs = value_counts / np.float32(len(values))
+
+        # Calculate information gain
+        return 1 + np.sum(probs*np.log2(probs))
+
 
 if __name__ == '__main__':
+    # TODO: Add testing
+    # TODO: Test info gain math
     X = np.array([[0, 0],
                   [1, 0],
                   [0, 1],
