@@ -18,9 +18,3 @@ def poisson(lmda, k):
     """
     return (lmda**k * np.exp(-lmda)) / np.math.factorial(k)
 
-
-if __name__ == '__main__':
-    # TODO: add testing
-    lmda = 1
-    k = 0
-    print(poisson(lmda, k))
