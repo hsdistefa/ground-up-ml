@@ -16,5 +16,6 @@ def poisson(lmda, k):
     Returns:
         Probability of k events occurring within the time interval used by lmda
     """
+    # NOTE: Will not work with large k as k! becomes too large
     return (lmda**k * np.exp(-lmda)) / np.math.factorial(k)
 
