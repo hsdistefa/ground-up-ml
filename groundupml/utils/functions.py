@@ -23,25 +23,22 @@ def entropy(y):
             The entropy of the set of labels in bits
     """
     # NOTE: Be careful of floating point arithmetic error
-    # Get the possible classes and number of occurences for each
-    labels, counts = np.unique(y, return_counts=True)
-
-    # Calculate entropy in bits (shannons)
-    p = counts / np.float32(len(y))  # Proportion of each label i in set y
-    entropy = 0
-    for i, label in enumerate(labels):
-        entropy += -p[i] * math.log(p[i]) / math.log(2)
+    # Calculate the probability of each class in the set (proportions)
+    _, counts = np.unique(y, return_counts=True)
+    probs = counts / len(y)  # Proportion of each label i in set y
+    # Entropy in bits (shannons)
+    entropy = -np.sum(probs * np.log2(probs))
 
     return entropy
 
 
-def information_gain(splits):
-    """Calculate the information gain when a set of labels is split into the
-    given subsets
+def information_gain(y_splits):
+    """Calculate the information gain when a set of labels is split into
+    the given subsets
 
     Args:
-        splits (list of length [n_splits] where each elements is a numpy array
-                of length [n_elements]):
+        splits (list of length [n_splits] where each element is a numpy 
+                array of length [n_elements]):
             Groupings where all groups together add up to the original set
 
     Returns:
@@ -49,16 +46,19 @@ def information_gain(splits):
             Information gain from breaking the original set into the given
             groupings
     """
-    # Rebuild the original set from the splits by adding them together
-    y = np.vstack(splits).flatten()
+    print(y_splits)
+    # Rebuild the parent target set by re-combining splits
+    parent_y = np.concatenate(y_splits)
 
-    # Get proportion of elements from original set in each split
-    p = np.array([len(a) for a in splits]) / np.float32(len(y))
+    # Calculate the probability of a sample falling in each child node
+    sizes = [len(split) for split in y_splits]
+    child_weights = sizes / np.float32(len(parent_y))
 
-    # Calculate amount of information gained when using given groupings
-    info_gain = entropy(y)
-    for i, split in enumerate(splits):
-        info_gain -= p[i] * entropy(split)
+    # Information gain is the difference between the parent-set's entropy 
+    # and the child-sets' entropies weighted by child-set size
+    parent_entropy = entropy(parent_y)
+    child_entropies = [entropy(split) for split in y_splits]
+    info_gain = parent_entropy - np.sum(child_weights * child_entropies)
 
     return info_gain
 
