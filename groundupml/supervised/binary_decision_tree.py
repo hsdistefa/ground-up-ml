@@ -5,13 +5,13 @@ from __future__ import division, print_function
 import numpy as np
 import scipy.stats
 
-#from groundupml.utils.functions import information_gain
+from groundupml.utils.functions import information_gain
 
 
 class DecisionNode():
     def __init__(self, value=None, feature_index=None, children=[]):
-        self.value = value
-        self.feature_index=feature_index
+        self.value = value  # Value of node if it is a leaf node
+        self.feature_index=feature_index  # Index of the feature to split branches
         self.children = children
 
     def _print_subtree(self, prefix, is_leaf):
@@ -62,13 +62,13 @@ class DecisionTree():
             X (numpy array of shape [n_samples, n_features]):
                 Training data
             y (numpy array of shape [n_samples]):
-                Training labels
+                Training thresholds
         """
         self.n_samples, self.n_features = X.shape
         self.root = self.id3(X, y)
 
     def predict(self, X):
-        """Predict the labels of the given test data using the fitted decision
+        """Predict the thresholds of the given test data using the fitted decision
         tree
 
         Args:
@@ -90,8 +90,8 @@ class DecisionTree():
             return subtree.value
 
         # Traverse the branch path corresponding to the sample's values
-        feature_label = x[subtree.feature_index]
-        y_pred = self._predict_sample(x, subtree=subtree.children[feature_label])
+        feature_threshold = x[subtree.feature_index]
+        y_pred = self._predict_sample(x, subtree=subtree.children[feature_threshold])
 
         return y_pred
 
@@ -103,7 +103,7 @@ class DecisionTree():
             X (numpy array of shape [n_samples, n_features]):
                 Train data
             y (numpy array of shape [n_samples]):
-                Train labels
+                Train thresholds
 
         Returns:
             N (DecisionNode):
@@ -114,7 +114,7 @@ class DecisionTree():
         # Instantiate feature list at tree root
         if features is None:
             # Store features as indices to reduce memory usage
-            # Use mask to keep track of already split features
+            # Use mask to keep track of already split features in branch
             features = np.ma.array(np.arange(self.n_features), mask=False)
 
         # Create leaf nodes either at max tree depth or when all
@@ -124,30 +124,17 @@ class DecisionTree():
             return DecisionNode(value=leaf_value)
             
         # Find feature split that would maximize information gain
-        max_gain = float('-inf')
-        for feature_i, _ in enumerate(features):
-            # Split on each feature only once per branch
-            if features.mask[feature_i] == True:  
-                continue
-
-            values = X[:, feature_i]
-            info_gain = self._information_gain(values)
-            if info_gain > max_gain:
-                max_gain = info_gain
-                best_feature_i = feature_i
+        best_feature_i, X_best_splits, y_best_splits = self._best_split(features,
+                                                                        X, y)
+        X_left_split, X_right_split = X_best_splits
+        y_left_split, y_right_split = y_best_splits
 
         # Split on feature that gives max information gain
         features.mask[best_feature_i] = True  # Mark feature as used
         # Each branch needs a separate copy of the feature mask
         features_copy = np.ma.array(features, copy=True)  
 
-        X_left_split = X[values == 0]
-        y_left_split = y[values == 0]
-
-        X_right_split = X[values == 1]
-        y_right_split = y[values == 1]
-
-        # If a split is empty, create a leaf with the only remaining label
+        # If a split is empty, create a leaf with the only remaining threshold
         if len(y_left_split) == 0 or len(y_right_split) == 0:
             return DecisionNode(value=self._compute_leaf_value(y))
 
@@ -160,20 +147,48 @@ class DecisionTree():
 
         return DecisionNode(feature_index=best_feature_i, children=branches)
 
-    def _compute_leaf_value(self, labels):
+    def _best_split(self, features, X, y):
+        best_feature_i = None
+        best_threshold = None
+        max_info_gain = float('-inf')
+
+        # Find the feature and threshold that maximize info gain
+        for feature_i, _ in enumerate(features):
+            # Split on each feature only once per branch
+            if features.mask[feature_i] == True:  
+                continue
+            
+            # Get the possible thresholds for splitting this feature
+            values = X[:, feature_i]
+            thresholds = np.unique(values) 
+
+            for threshold in thresholds:
+                # Calculate info gain for splitting on each possible threshold
+                y_left_split = y[values <= threshold]
+                y_right_split = y[values > threshold]
+
+                X_left_split = X[values <= threshold]
+                X_right_split = X[values > threshold]
+
+                y_splits = [y_left_split, y_right_split]
+                info_gain = information_gain(y_splits)
+
+                # Keep track of feature and threshold with the best info gain
+                if info_gain > max_info_gain:
+                    max_info_gain = info_gain
+                    best_feature_i = feature_i
+                    best_splits_X = [X_left_split, X_right_split]
+                    best_splits_y = y_splits
+
+        return best_feature_i, best_splits_X, best_splits_y
+
+    def _compute_leaf_value(self, thresholds):
         # Return the most common value
         unique, counts = np.unique(y, return_counts=True)
         if len(unique) == 0:
             return None
         return unique[counts.argmax()]
 
-    def _information_gain(self, values):
-        # Calculate the probability of seeing each value of feature i
-        _, value_counts = np.unique(values, return_counts=True)
-        probs = value_counts / np.float32(len(values))
-
-        # Calculate information gain
-        return 1 + np.sum(probs*np.log2(probs))
 
 
 if __name__ == '__main__':
@@ -188,6 +203,8 @@ if __name__ == '__main__':
 
     y = np.array([0, 1, 1, 0, 0])
     dt = DecisionTree(max_depth=3)
+    splits = [[0,1,0], [1,0]]
+    information_gain(splits)
     dt.fit(X, y)
     print(dt)
     X_test = X
