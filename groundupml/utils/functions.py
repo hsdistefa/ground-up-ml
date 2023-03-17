@@ -46,7 +46,6 @@ def information_gain(y_splits):
             Information gain from breaking the original set into the given
             groupings
     """
-    print(y_splits)
     # Rebuild the parent target set by re-combining splits
     parent_y = np.concatenate(y_splits)
 
