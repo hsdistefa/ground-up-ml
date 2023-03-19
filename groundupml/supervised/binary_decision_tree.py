@@ -109,42 +109,36 @@ class DecisionTree():
             N (DecisionNode):
                 The root node of the fitted decision tree
         """
-        depth += 1
-
         # Instantiate feature list at tree root
         if features is None:
             # Store features as indices to reduce memory usage
             # Use mask to keep track of already split features in branch
             features = np.ma.array(np.arange(self.n_features), mask=False)
 
-        # Create leaf nodes either at max tree depth or when all
-        # features have been split on
-        if depth > self.max_depth or np.all(features.mask == True):
+        # Ensure tree does not exceed max depth
+        if depth > self.max_depth: 
             leaf_value = self._compute_leaf_value(y)
             return DecisionNode(value=leaf_value)
             
         # Find feature split that would maximize information gain
         best_feature_i, X_best_splits, y_best_splits = self._best_split(features,
                                                                         X, y)
-        #print('Best feature_i:', best_feature_i)
-        #print('X best splits:\n', X_best_splits)
-        #print('y best splits:\n', y_best_splits)
         X_left_split, X_right_split = X_best_splits
         y_left_split, y_right_split = y_best_splits
 
-        # Split on feature that gives max information gain
-        features.mask[best_feature_i] = True  # Mark feature as used
-        # Each branch needs a separate copy of the feature mask
-        features_copy = np.ma.array(features, copy=True)  
-
-        # If a split is empty, create a leaf with the only remaining threshold
+        # If a split is empty, create a leaf with the remaining values
         if len(y_left_split) == 0 or len(y_right_split) == 0:
             return DecisionNode(value=self._compute_leaf_value(y))
 
+        # Split on feature that gives max information gain
+        features_copy = np.ma.array(features, copy=True)  
+
         left_branch = self.id3(X_left_split, y_left_split, 
-                               features=features_copy, depth=depth)
+                               features=features_copy, 
+                               depth=depth+1)
         right_branch = self.id3(X_right_split, y_right_split, 
-                                features=features_copy, depth=depth)
+                                features=features_copy, 
+                                depth=depth+1)
 
         branches = [left_branch, right_branch]
 
@@ -152,20 +146,19 @@ class DecisionTree():
 
     def _best_split(self, features, X, y):
         best_feature_i = None
-        best_threshold = None
         max_info_gain = float('-inf')
+        best_splits_X = []
+        best_splits_y = []
 
         # Find the feature and threshold that maximize info gain
         for feature_i, _ in enumerate(features):
             # Split on each feature only once per branch
-            if features.mask[feature_i] == True:  
-                continue
             
             # Get the possible thresholds for splitting this feature
             values = X[:, feature_i]
-            thresholds = np.unique(values) 
+            unique_values = np.unique(values) 
 
-            for threshold in thresholds:
+            for threshold in unique_values:
                 # Calculate info gain for splitting on each possible threshold
                 y_left_split = y[values <= threshold]
                 y_right_split = y[values > threshold]
