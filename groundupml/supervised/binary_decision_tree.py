@@ -9,9 +9,11 @@ from groundupml.utils.functions import information_gain
 
 
 class DecisionNode():
-    def __init__(self, value=None, feature_index=None, children=[]):
+    def __init__(self, value=None, feature_index=None, threshold=None, 
+                 children=[]):
         self.value = value  # Value of node if it is a leaf node
         self.feature_index=feature_index  # Index of the feature to split branches
+        self.threshold = threshold
         self.children = children
 
     def _print_subtree(self, prefix, is_leaf):
@@ -90,8 +92,12 @@ class DecisionTree():
             return subtree.value
 
         # Traverse the branch path corresponding to the sample's values
-        feature_threshold = x[subtree.feature_index]
-        y_pred = self._predict_sample(x, subtree=subtree.children[feature_threshold])
+        feature_value = x[subtree.feature_index]
+        if feature_value <= subtree.threshold:
+            branch = subtree.children[0]
+        else:
+            branch = subtree.children[1]
+        y_pred = self._predict_sample(x, subtree=branch)
 
         return y_pred
 
@@ -121,7 +127,7 @@ class DecisionTree():
             return DecisionNode(value=leaf_value)
             
         # Find feature split that would maximize information gain
-        best_feature_i, X_best_splits, y_best_splits = self._best_split(features,
+        best_feature_i, best_threshold, X_best_splits, y_best_splits = self._best_split(features,
                                                                         X, y)
         X_left_split, X_right_split = X_best_splits
         y_left_split, y_right_split = y_best_splits
@@ -142,10 +148,13 @@ class DecisionTree():
 
         branches = [left_branch, right_branch]
 
-        return DecisionNode(feature_index=best_feature_i, children=branches)
+        return DecisionNode(feature_index=best_feature_i, 
+                            threshold=best_threshold,
+                            children=branches)
 
     def _best_split(self, features, X, y):
         best_feature_i = None
+        best_threshold = None
         max_info_gain = float('-inf')
         best_splits_X = []
         best_splits_y = []
@@ -173,10 +182,11 @@ class DecisionTree():
                 if info_gain > max_info_gain:
                     max_info_gain = info_gain
                     best_feature_i = feature_i
+                    best_threshold = threshold
                     best_splits_X = [X_left_split, X_right_split]
                     best_splits_y = y_splits
 
-        return best_feature_i, best_splits_X, best_splits_y
+        return best_feature_i, best_threshold, best_splits_X, best_splits_y
 
     def _compute_leaf_value(self, y):
         # Return the most common value
