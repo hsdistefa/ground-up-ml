@@ -20,7 +20,7 @@ class DecisionNode():
             is_leaf = True
             name = str(self.value)  # Leaf value representation
         else:
-            name = 'f' + str(' feature x')  # Nonleaf value representation
+            name = 'f' + str(self.feature_index)  # Nonleaf value representation
         res = prefix + ('└──' if is_leaf else '├──') + name + '\n'
 
         for i, child in enumerate(self.children):
@@ -126,6 +126,9 @@ class DecisionTree():
         # Find feature split that would maximize information gain
         best_feature_i, X_best_splits, y_best_splits = self._best_split(features,
                                                                         X, y)
+        #print('Best feature_i:', best_feature_i)
+        #print('X best splits:\n', X_best_splits)
+        #print('y best splits:\n', y_best_splits)
         X_left_split, X_right_split = X_best_splits
         y_left_split, y_right_split = y_best_splits
 
@@ -182,7 +185,7 @@ class DecisionTree():
 
         return best_feature_i, best_splits_X, best_splits_y
 
-    def _compute_leaf_value(self, thresholds):
+    def _compute_leaf_value(self, y):
         # Return the most common value
         unique, counts = np.unique(y, return_counts=True)
         if len(unique) == 0:
@@ -193,7 +196,6 @@ class DecisionTree():
 
 if __name__ == '__main__':
     # TODO: Add testing
-    # TODO: Test info gain math
     X = np.array([[0, 0],
                   [1, 0],
                   [0, 1],
@@ -203,8 +205,6 @@ if __name__ == '__main__':
 
     y = np.array([0, 1, 1, 0, 0])
     dt = DecisionTree(max_depth=3)
-    splits = [[0,1,0], [1,0]]
-    information_gain(splits)
     dt.fit(X, y)
     print(dt)
     X_test = X
