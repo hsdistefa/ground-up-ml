@@ -32,7 +32,7 @@ def entropy(y):
     return entropy
 
 
-def information_gain(y_splits):
+def information_gain(y_splits, impurity_func):
     """Calculate the information gain when a set of labels is split into
     the given subsets
 
@@ -40,12 +40,21 @@ def information_gain(y_splits):
         splits (list of length [n_splits] where each element is a numpy 
                 array of length [n_elements]):
             Groupings where all groups together add up to the original set
+        impurity_func (`obj` str):
+            Impurity function to use when calculating information gain. 'gini'
+            or 'entropy'
 
     Returns:
         information_gain (float):
             Information gain from breaking the original set into the given
             groupings
     """
+    # Set impurity function as lambda
+    if impurity_func == 'gini':
+        impurity_func = gini
+    elif impurity_func == 'entropy':
+        impurity_func = entropy
+
     # Rebuild the parent target set by re-combining splits
     parent_y = np.concatenate(y_splits)
 
@@ -53,14 +62,29 @@ def information_gain(y_splits):
     sizes = [len(split) for split in y_splits]
     child_weights = sizes / np.float32(len(parent_y))
 
-    # Information gain is the difference between the parent-set's entropy 
-    # and the child-sets' entropies weighted by child-set size
-    parent_entropy = entropy(parent_y)
-    child_entropies = [entropy(split) for split in y_splits]
-    info_gain = parent_entropy - np.sum(child_weights * child_entropies)
+    # Information gain is the difference between the parent-set's impurity 
+    # and the child-sets' impurities weighted by child-set size
+    parent_impurity = impurity_func(parent_y)
+    child_impurities = [impurity_func(split) for split in y_splits]
+    info_gain = parent_impurity - np.sum(child_weights * child_impurities)
 
     return info_gain
 
+def gini(y):
+    """Calculate the gini impurity of a set of labels
+
+    Args:
+        y (numpy array of shape [n_samples]):
+            Set of labels to calculate gini impurity on
+
+    Returns:
+        gini impurity (float):
+            The gini impurity of the set of labels
+    """
+    _, counts = np.unique(y, return_counts=True)
+    probs = counts / len(y)
+
+    return 1 - np.sum(probs**2)
 
 def sigmoid(x):
     """Calculate sigmoid function element-wise on a tensor

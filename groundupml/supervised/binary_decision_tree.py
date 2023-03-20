@@ -3,7 +3,6 @@
 from __future__ import division, print_function
 
 import numpy as np
-import scipy.stats
 
 from groundupml.utils.functions import information_gain
 
@@ -43,11 +42,14 @@ class DecisionTree():
     Args:
         max_depth (:obj: `int`, optional):
             Maximum depth to allow the decision tree to be built to.
+        impurity_func (:obj: `str`, optional):
+            Name of the impurity function to use when calculating 
+            information gain. 'gini' or 'entropy'
 
     """
-    def __init__(self, root=None, max_depth=None):
+    def __init__(self, root=None, impurity_func='entropy', max_depth=None):
         self.root = root
-
+        self.impurity_func = impurity_func
         if max_depth is None:
             self.max_depth = float('inf')
         else:
@@ -176,7 +178,7 @@ class DecisionTree():
                 X_right_split = X[values > threshold]
 
                 y_splits = [y_left_split, y_right_split]
-                info_gain = information_gain(y_splits)
+                info_gain = information_gain(y_splits, self.impurity_func)
 
                 # Keep track of feature and threshold with the best info gain
                 if info_gain > max_info_gain:
@@ -207,7 +209,7 @@ if __name__ == '__main__':
                  ])
 
     y = np.array([0, 1, 1, 0, 0])
-    dt = DecisionTree(max_depth=3)
+    dt = DecisionTree(max_depth=3, impurity_func='gini')
     dt.fit(X, y)
     print(dt)
     X_test = X
