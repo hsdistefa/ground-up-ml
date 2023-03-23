@@ -91,6 +91,21 @@ def sigmoid(x):
     """
     return 1.0 / (1.0 + np.exp(-x))
 
+def sigmoid_prime(sigmoid_x):
+    """Calculate the derivative of the sigmoid function element-wise on a
+    tensor
+
+    Args:
+        sigmoid_x (numpy array):
+            The output of the sigmoid activations to calculate the derivatives
+            on. This is passed in to avoid having to re-calculate the sigmoid.
+    
+    Returns:
+        sigmoid_prime (numpy array of same size as input):
+            The derivative of the sigmoid function
+    """
+    return sigmoid_x * (1 - sigmoid_x)
+
 
 def to_one_hot(a):
     one_hot = np.zeros((a.size, a.max()+1))  # Might be slow for large input

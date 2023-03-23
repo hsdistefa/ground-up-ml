@@ -2,8 +2,8 @@ from __future__ import print_function, division
 
 import numpy as np
 
-from groundupml.utils.functions import to_one_hot, one_hot_to_hard_pred
-from groundupml.utils.data_manipulation import shuffle_data
+from groundupml.utils.functions import sigmoid, sigmoid_prime #to_one_hot, one_hot_to_hard_pred
+#from groundupml.utils.data_manipulation import shuffle_data
 
 
 class LinearLayer():
@@ -18,9 +18,18 @@ class LinearLayer():
             Step magnitude used for updating layer weights when relevant.
     """
     def __init__(self, n_nodes, n_inputs, learning_rate=.01):
+        # TODO: Remove unnecessary attributes
         self.n_nodes = n_nodes
         self.n_inputs = n_inputs
         self.learning_rate = learning_rate
+        self.weights = None
+        self.biases = None
+        self.X = None
+        self.z = None
+        self.gradient = None
+        self.d_weights = None
+        self.d_biases = None
+        self.d_X = None
 
     def init_weights(self):
         """Initialize weights and biases"""
@@ -45,7 +54,7 @@ class LinearLayer():
 
         Returns:
             numpy array of shape [n_samples, n_nodes]:
-                Output of layer
+                Linearly transformed output of layer
         """
         self.X = X
         self.z = np.dot(X, self.weights.T) + self.biases
@@ -80,25 +89,77 @@ class LinearLayer():
             self.n_nodes, self.n_inputs, self.learning_rate)
 
 
+class SigmoidLayer():
+    """Sigmoid Layer
+
+    Args:
+        n_nodes (int):
+            Number of nodes in layer.
+        n_inputs (int):
+            Number of inputs to layer.
+    """
+    def __init__(self):
+        self.inputs = None
+        self.activations = None
+    
+    def forward_propogate(self, X):
+        """Propogate input forward through layer
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Input data
+
+        Returns:
+            numpy array of shape [n_classes, 1]:
+                Activated output where values correspond to sigmoid activations
+        """
+        self.inputs = X
+        self.activations = sigmoid(X)
+
+        return self.activations
+
+    def back_propogate(self, gradient):
+        """Propogate error gradient backward through layer using chain rule
+
+        Args:
+            gradient (numpy array of shape [n_samples, n_nodes]):
+                Error gradient
+
+        Returns:
+            numpy array of shape [n_samples, n_inputs]:
+                Error gradient for layer below
+        """
+        # Derivative of sigmoid function is sigmoid(x) * (1 - sigmoid(x))
+        # we can use the cached activations to save computation
+        return gradient * sigmoid_prime(self.activations)
+
+
 if __name__ == '__main__':
     # Test LinearLayer
-    layer = LinearLayer(3, 2, learning_rate=.01)
-    layer.init_weights()
-    layer.set_learning_rate(.01)
+    fc_layer = LinearLayer(n_nodes=3, n_inputs=2, learning_rate=.01)
+    fc_layer.init_weights()
+    sig_layer = SigmoidLayer()
 
-    X = np.array([[1, 2], [3, 4], [5, 6]])
-    y = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    X_train = np.array([[1, 2], [3, 4], [5, 6]])
+    y_train = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 
-    print('X.shape:', X.shape)
-    print('y.shape:', y.shape)
+    print('X shape:', X_train.shape)
+    print('y shape:', y_train.shape)
 
-    z = layer.forward_propogate(X)
+    # Forward propogate
+    z = fc_layer.forward_propogate(X_train)
     print('z:', z.shape)
 
-    gradient = layer.back_propogate(y)
-    print('gradient.shape:', gradient.shape)
-    print('gradients', gradient)
+    a = sig_layer.forward_propogate(z)
+    print('a:', a.shape)
 
-    layer.update_weights()
+    # Backward propogate error gradients
+    error = a - y_train
+    gradients_a = sig_layer.back_propogate(error)
+    print('gradients_a.shape:', gradients_a.shape)
+    gradients_z = fc_layer.back_propogate(gradients_a)
+    print('gradients_z.shape:', gradients_z.shape)
 
-    print(layer)
+    fc_layer.update_weights()
+
+    print(fc_layer)
