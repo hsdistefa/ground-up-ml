@@ -3,8 +3,26 @@ from __future__ import division, print_function
 import numpy as np
 
 
+def scale_min_max(x):
+    """Scale the given data by feature so all features have a maximum value
+    of 1 and a minimum of 1.
+
+    Args:
+        x (numpy array of shape [n_samples, n_features]): 
+            Data to scale.
+
+    Returns:
+        Scaled data
+    """
+    col_mins = np.nanmin(x, axis=0)
+    col_maxes = np.nanmax(x, axis=0)
+
+    min_max_scaled = (x - col_mins) / (col_maxes - col_mins)
+
+    return min_max_scaled
+
 def shuffle_data(X, y):
-    """Shuffle the samples of data set and the corresponding labels
+    """Shuffle the samples of data set and the corresponding labels.
     """
     indices = np.random.permutation(len(X))
 

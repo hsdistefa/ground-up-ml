@@ -135,31 +135,75 @@ class SigmoidLayer():
 
 
 if __name__ == '__main__':
-    # Test LinearLayer
-    fc_layer = LinearLayer(n_nodes=3, n_inputs=2, learning_rate=.01)
+    import matplotlib.pyplot as plt
+
+    from sklearn import datasets
+
+    from groundupml.utils.data_manipulation import split_data, scale_min_max
+    from groundupml.utils.functions import one_hot_to_class, to_one_hot
+    from groundupml.utils.data_tools import confusion_matrix
+
+    # Load data
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target
+
+    # Split into train and test sets
+    X_train, y_train, X_test, y_test = split_data(X, y, proportion=0.8)
+
+    # Scale features to be between 0 and 1 for NN
+    X_train = scale_min_max(X_train)
+    X_test = scale_min_max(X_test)
+
+    # Convert labels to one hot vectors
+    y_train = to_one_hot(y_train)
+    y_test = to_one_hot(y_test)
+
+    print('Train shapes:', X_train.shape, y_train.shape)
+    print('Test shapes:', X_test.shape, y_test.shape)
+
+    # Train neural network
+    np.random.seed(1)
+    n_epochs = 10000
+    learning_rate = 1e-2
+
+    fc_layer = LinearLayer(n_nodes=3, n_inputs=4, learning_rate=learning_rate)
     fc_layer.init_weights()
+    print(fc_layer)
     sig_layer = SigmoidLayer()
 
-    X_train = np.array([[1, 2], [3, 4], [5, 6]])
-    y_train = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    costs = []
+    for i in range(n_epochs):
+        # Forward propogate
+        z = fc_layer.forward_propogate(X_train)
+        #print('z:', z.shape)
 
-    print('X shape:', X_train.shape)
-    print('y shape:', y_train.shape)
+        a = sig_layer.forward_propogate(z)
+        #print('a:', a.shape)
+        y_pred = a
+        # Calculate costs using squared error
+        squared_error = 0.5 * np.sum((y_train - y_pred)**2)
+        costs.append(squared_error)
 
-    # Forward propogate
-    z = fc_layer.forward_propogate(X_train)
-    print('z:', z.shape)
+        # Backward propogate error gradients
+        error = a - y_train
+        gradients_a = sig_layer.back_propogate(error)
+        #print('gradients_a.shape:', gradients_a.shape)
+        gradients_z = fc_layer.back_propogate(gradients_a)
+        #print('gradients_z.shape:', gradients_z.shape)
 
+        fc_layer.update_weights()
+
+        if i % 1000 == 0:
+            print('Epoch:', i, 'Cost:', costs[-1])
+
+    # Get test predictions
+    z = fc_layer.forward_propogate(X_test)
     a = sig_layer.forward_propogate(z)
-    print('a:', a.shape)
+    predictions = np.argmax(a, axis=1)
+    actual = one_hot_to_class(y_test)
 
-    # Backward propogate error gradients
-    error = a - y_train
-    gradients_a = sig_layer.back_propogate(error)
-    print('gradients_a.shape:', gradients_a.shape)
-    gradients_z = fc_layer.back_propogate(gradients_a)
-    print('gradients_z.shape:', gradients_z.shape)
+    print(predictions)
+    print(actual)
 
-    fc_layer.update_weights()
-
-    print(fc_layer)
+    print(confusion_matrix(actual, predictions))
