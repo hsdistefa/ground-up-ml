@@ -143,6 +143,9 @@ if __name__ == '__main__':
     from groundupml.utils.functions import one_hot_to_class, to_one_hot
     from groundupml.utils.data_tools import confusion_matrix
 
+    # Set seed for reproducibility
+    np.random.seed(1)
+
     # Load data
     iris = datasets.load_iris()
     X = iris.data
@@ -163,22 +166,26 @@ if __name__ == '__main__':
     print('Test shapes:', X_test.shape, y_test.shape)
 
     # Train neural network
-    np.random.seed(1)
     n_epochs = 10000
     learning_rate = 1e-2
 
-    fc_layer = LinearLayer(n_nodes=3, n_inputs=4, learning_rate=learning_rate)
-    fc_layer.init_weights()
-    print(fc_layer)
+    fc_layer1 = LinearLayer(n_nodes=3, n_inputs=4, learning_rate=learning_rate)
+    fc_layer1.init_weights()
+    print(fc_layer1)
+    fc_layer2 = LinearLayer(n_nodes=3, n_inputs=3, learning_rate=learning_rate)
+    fc_layer2.init_weights()
+    print(fc_layer2)
     sig_layer = SigmoidLayer()
 
     costs = []
     for i in range(n_epochs):
         # Forward propogate
-        z = fc_layer.forward_propogate(X_train)
-        #print('z:', z.shape)
+        z1 = fc_layer1.forward_propogate(X_train)
+        #print('z1:', z1.shape)
+        z2 = fc_layer2.forward_propogate(z1)
+        #print('z2:', z2.shape)
 
-        a = sig_layer.forward_propogate(z)
+        a = sig_layer.forward_propogate(z2)
         #print('a:', a.shape)
         y_pred = a
         # Calculate costs using squared error
@@ -186,20 +193,23 @@ if __name__ == '__main__':
         costs.append(squared_error)
 
         # Backward propogate error gradients
-        error = a - y_train
-        gradients_a = sig_layer.back_propogate(error)
+        d_error = a - y_train
+        gradients_a = sig_layer.back_propogate(d_error)
         #print('gradients_a.shape:', gradients_a.shape)
-        gradients_z = fc_layer.back_propogate(gradients_a)
-        #print('gradients_z.shape:', gradients_z.shape)
-
-        fc_layer.update_weights()
+        gradients_z2 = fc_layer2.back_propogate(gradients_a)
+        fc_layer2.update_weights()
+        #print('gradients_z2.shape:', gradients_z2.shape)
+        gradients_z1 = fc_layer1.back_propogate(gradients_z2)
+        fc_layer1.update_weights()
+        #print('gradients_z1.shape:', gradients_z1.shape)
 
         if i % 1000 == 0:
             print('Epoch:', i, 'Cost:', costs[-1])
 
     # Get test predictions
-    z = fc_layer.forward_propogate(X_test)
-    a = sig_layer.forward_propogate(z)
+    z1 = fc_layer1.forward_propogate(X_test)
+    z2 = fc_layer2.forward_propogate(z1)
+    a = sig_layer.forward_propogate(z2)
     predictions = np.argmax(a, axis=1)
     actual = one_hot_to_class(y_test)
 
