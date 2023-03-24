@@ -130,8 +130,51 @@ class SigmoidLayer():
                 Error gradient for layer below
         """
         # Derivative of sigmoid function is sigmoid(x) * (1 - sigmoid(x))
-        # we can use the cached activations to save computation
+        # We can use the cached activations to save computation
         return gradient * sigmoid_prime(self.activations)
+
+class ReLuLayer():
+    """Rectified Linear Unit Layer
+    
+    ReLu activation functions act as a thresholding mechanism, where all values
+    below 0 are set to 0. ReLu layers can be used to add nonlinearities while
+    avoiding the vanishing gradient problem that arises with the sigmoid and
+    hyperbolic tangent activation functions in deep neural networks.
+    """
+    def __init__(self):
+        self.inputs = None
+        self.activations = None
+    
+    def forward_propogate(self, X):
+        """Propogate input forward through layer
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Input data
+
+        Returns:
+            numpy array of shape [n_classes, 1]:
+                Activated output where values correspond to sigmoid activations
+        """
+        self.inputs = X
+        self.activations = np.maximum(0.0, X)  # Use 0.0 to avoid int division
+
+        return self.activations
+
+    def back_propogate(self, gradient):
+        """Propogate error gradient backward through layer using chain rule
+
+        Args:
+            gradient (numpy array of shape [n_samples, n_nodes]):
+                Error gradient
+
+        Returns:
+            numpy array of shape [n_samples, n_inputs]:
+                Error gradient for layer below
+        """
+        # Derivative of relu function is 1 if x > 0, 0 otherwise
+        # We can use the cached activations to save computation
+        return gradient * (self.activations > 0)
 
 
 if __name__ == '__main__':
@@ -185,15 +228,14 @@ if __name__ == '__main__':
         z2 = fc_layer2.forward_propogate(z1)
         #print('z2:', z2.shape)
 
-        a = sig_layer.forward_propogate(z2)
-        #print('a:', a.shape)
-        y_pred = a
+        activations = sig_layer.forward_propogate(z2)
+        #print('activations.shape:', activations.shape)
         # Calculate costs using squared error
-        squared_error = 0.5 * np.sum((y_train - y_pred)**2)
+        squared_error = 0.5 * np.sum((y_train - activations)**2)
         costs.append(squared_error)
 
         # Backward propogate error gradients
-        d_error = a - y_train
+        d_error = activations - y_train
         gradients_a = sig_layer.back_propogate(d_error)
         #print('gradients_a.shape:', gradients_a.shape)
         gradients_z2 = fc_layer2.back_propogate(gradients_a)
