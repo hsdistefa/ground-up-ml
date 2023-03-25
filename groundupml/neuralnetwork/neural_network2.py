@@ -2,12 +2,14 @@ from __future__ import print_function, division
 
 import numpy as np
 
-from groundupml.utils.functions import sigmoid, sigmoid_prime #to_one_hot, one_hot_to_hard_pred
-#from groundupml.utils.data_manipulation import shuffle_data
+from groundupml.utils.functions import sigmoid, sigmoid_prime
 
 
 class LinearLayer():
-    """Linear Layer
+    """Fully connected layer that applies a linear transformation to the input:
+    :math:`y = XW^T + b`
+    Where W is the learnable weights matrix, b is the learnablebiases vector, 
+    and X is the input.
 
     Args:
         n_nodes (int):
@@ -33,8 +35,11 @@ class LinearLayer():
 
     def init_weights(self):
         """Initialize weights and biases"""
-        self.weights = np.random.randn(self.n_nodes, self.n_inputs)
-        self.biases = np.zeros(self.n_nodes)
+        stdv = np.sqrt(1. / self.n_inputs)
+        self.weights = np.random.uniform(-stdv, stdv, 
+                                         size=(self.n_nodes, self.n_inputs))
+        self.biases = np.random.uniform(-stdv, stdv,
+                                        size=(self.n_nodes))
 
     def set_learning_rate(self, learning_rate):
         """Set learning rate
@@ -134,7 +139,7 @@ class SigmoidLayer():
         return gradient * sigmoid_prime(self.activations)
 
 class ReLuLayer():
-    """Rectified Linear Unit Layer
+    """Applies the rectified linear unit function element-wise. 
     
     ReLu activation functions act as a thresholding mechanism, where all values
     below 0 are set to 0. ReLu layers can be used to add nonlinearities while
@@ -218,7 +223,7 @@ if __name__ == '__main__':
     fc_layer2 = LinearLayer(n_nodes=3, n_inputs=3, learning_rate=learning_rate)
     fc_layer2.init_weights()
     print(fc_layer2)
-    sig_layer = SigmoidLayer()
+    relu_layer = ReLuLayer()
 
     costs = []
     for i in range(n_epochs):
@@ -227,8 +232,8 @@ if __name__ == '__main__':
         #print('z1:', z1.shape)
         z2 = fc_layer2.forward_propogate(z1)
         #print('z2:', z2.shape)
-
-        activations = sig_layer.forward_propogate(z2)
+        #print('z2:', z2)
+        activations = relu_layer.forward_propogate(z2)
         #print('activations.shape:', activations.shape)
         # Calculate costs using squared error
         squared_error = 0.5 * np.sum((y_train - activations)**2)
@@ -236,7 +241,9 @@ if __name__ == '__main__':
 
         # Backward propogate error gradients
         d_error = activations - y_train
-        gradients_a = sig_layer.back_propogate(d_error)
+        #print('d_error:', d_error)
+        gradients_a = relu_layer.back_propogate(d_error)
+        #print('Gradients a:', gradients_a)
         #print('gradients_a.shape:', gradients_a.shape)
         gradients_z2 = fc_layer2.back_propogate(gradients_a)
         fc_layer2.update_weights()
@@ -251,7 +258,7 @@ if __name__ == '__main__':
     # Get test predictions
     z1 = fc_layer1.forward_propogate(X_test)
     z2 = fc_layer2.forward_propogate(z1)
-    a = sig_layer.forward_propogate(z2)
+    a = relu_layer.forward_propogate(z2)
     predictions = np.argmax(a, axis=1)
     actual = one_hot_to_class(y_test)
 
