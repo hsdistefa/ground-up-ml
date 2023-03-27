@@ -30,7 +30,7 @@ if __name__ == '__main__':
                         [4, 2],
                         [8, 8]])
 
-    y_train = np.array([0, 1, 2])
+    y_train = np.array(['person', 'dog', 'spider'])
     dt = DecisionTree(max_depth=3, impurity_func='gini')
     dt.fit(X_train, y_train)
     print(dt)
