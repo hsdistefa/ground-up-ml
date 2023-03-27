@@ -23,9 +23,10 @@ if __name__ == '__main__':
     print(pred)
 
     # Try other training sets
-    # Feature 1 is number of legs, feature 2 is number of eyes
-    # Class 0 is a person (2 legs, 2 eyes), class 1 is a dog (4 legs, 2 eyes),
-    # Class 3 is a spider (8 legs, 8 eyes)
+    # Feature 0 is number of legs, feature 1 is number of eyes
+    # Class 0 is a person (2 legs, 2 eyes)
+    # Class 1 is a dog (4 legs, 2 eyes),
+    # Class 2 is a spider (8 legs, 8 eyes)
     X_train = np.array([[2, 2],
                         [4, 2],
                         [8, 8]])
