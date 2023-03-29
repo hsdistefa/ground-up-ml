@@ -109,6 +109,7 @@ def sigmoid_prime(sigmoid_x):
 def softmax(x):
     """Compute softmax of tensor x
     """
+    # TODO: Test softmax function
     # Subtract the maximum value to avoid overflow (make more numerically stable)
     exps = np.exp(x - np.max(x, axis=1, keepdims=True))
 

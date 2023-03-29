@@ -222,16 +222,24 @@ class SoftmaxLayer():
             numpy array of shape [n_samples, n_inputs]:
                 Error gradient for layer below
         """
-        # Derivative of softmax function derivation can be found here:
+        # Derivations of softmax function Jacobian matrix can be found here:
         # https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
-        # We save some computation by caching activations
-        for i in range(self.activations.shape[0])):
-            for j in range(self.inputs.shape[0]):
-                if i == j:
-                    gradient[i] = self.activations[i] * (1-self.activations[i])
-                else:
-                    gradient[i] -= -self.activations[i] * self.activations[j]
-        return gradient * sigmoid_prime(self.activations)
+        # NOTE: We save some computation by caching activations
+        # NOTE: Vectorized implementation
+        # Does the same thing as constructing the jacobian matrix like this:
+        #     sm = softmax(x)
+        #     jacobian_m = np.diag(sm)
+        #     for i in range(jacobian_m.shape[0]):
+        #         for j in range(jacobian_m.shape[1]):
+        #             if i == j:
+        #                 jacobian_m[i][j] = sm[i] * (1 - sm[i])
+        #             else:
+        #                 jacobian_m[i][j] = -sm[i] * sm[j]
+        # TODO: Test gradients
+        I = np.eye(self.activations.shape[0])
+        jacobian_m = self.activations * (I - self.activations.T)
+
+        return gradient * jacobian_m
 
 
 if __name__ == '__main__':
