@@ -106,6 +106,14 @@ def sigmoid_prime(sigmoid_x):
     """
     return sigmoid_x * (1 - sigmoid_x)
 
+def softmax(x):
+    """Compute softmax of tensor x
+    """
+    # Subtract the maximum value to avoid overflow (make more numerically stable)
+    exps = np.exp(x - np.max(x, axis=1, keepdims=True))
+
+    return exps / np.sum(exps, axis=1, keepdims=True)
+
 
 def to_one_hot(a):
     one_hot = np.zeros((a.size, a.max()+1))  # Might be slow for large input

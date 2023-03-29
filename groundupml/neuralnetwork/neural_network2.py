@@ -2,7 +2,7 @@ from __future__ import print_function, division
 
 import numpy as np
 
-from groundupml.utils.functions import sigmoid, sigmoid_prime
+from groundupml.utils.functions import sigmoid, sigmoid_prime, softmax
 
 
 class LinearLayer():
@@ -180,6 +180,58 @@ class ReLuLayer():
         # Derivative of relu function is 1 if x > 0, 0 otherwise
         # We can use the cached activations to save computation
         return gradient * (self.activations > 0)
+
+
+class SoftmaxLayer():
+    """Softmax Layer
+
+    Args:
+        n_nodes (int):
+            Number of nodes in layer.
+        n_inputs (int):
+            Number of inputs to layer.
+    """
+    def __init__(self):
+        self.inputs = None
+        self.activations = None
+    
+    def forward_propogate(self, X):
+        """Propogate input forward through layer
+
+        Args:
+            X (numpy array of shape [n_samples, n_features]):
+                Input data
+
+        Returns:
+            numpy array of shape [n_classes, 1]:
+                Activated output where values correspond to softmax activations
+        """
+        self.inputs = X
+        self.activations = softmax(X)
+
+        return self.activations
+
+    def back_propogate(self, gradient):
+        """Propogate error gradient backward through layer using chain rule
+
+        Args:
+            gradient (numpy array of shape [n_samples, n_nodes]):
+                Error gradient
+
+        Returns:
+            numpy array of shape [n_samples, n_inputs]:
+                Error gradient for layer below
+        """
+        # Derivative of softmax function derivation can be found here:
+        # https://eli.thegreenplace.net/2016/the-softmax-function-and-its-derivative/
+        # We save some computation by caching activations
+        for i in range(self.activations.shape[0])):
+            for j in range(self.inputs.shape[0]):
+                if i == j:
+                    gradient[i] = self.activations[i] * (1-self.activations[i])
+                else:
+                    gradient[i] -= -self.activations[i] * self.activations[j]
+        return gradient * sigmoid_prime(self.activations)
 
 
 if __name__ == '__main__':
