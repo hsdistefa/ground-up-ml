@@ -185,6 +185,13 @@ class ReLuLayer():
 class SoftmaxLayer():
     """Softmax Layer
 
+    Softmax activation functions are used in the output layer of a neural
+    network to get a probability distribution over the classes. The outputs
+    can be interpreted as the probability that the neural network 'believes'
+    a sample belongs to each possible class. For example, 2% chance of being a
+    duck, 18% chance of being a dog, 80% chance of being a cat. Notice that the
+    sum of the probabilities is 1.
+
     Args:
         n_nodes (int):
             Number of nodes in layer.
@@ -227,7 +234,7 @@ class SoftmaxLayer():
         # NOTE: We save some computation by caching activations
         # NOTE: Vectorized implementation
         # Does the same thing as constructing the jacobian matrix like this:
-        #     sm = softmax(x)
+        # For each softmax vector sm:
         #     jacobian_m = np.diag(sm)
         #     for i in range(jacobian_m.shape[0]):
         #         for j in range(jacobian_m.shape[1]):
@@ -235,11 +242,16 @@ class SoftmaxLayer():
         #                 jacobian_m[i][j] = sm[i] * (1 - sm[i])
         #             else:
         #                 jacobian_m[i][j] = -sm[i] * sm[j]
+        # TODO: Backpropogate Jacobians
         # TODO: Test gradients
-        I = np.eye(self.activations.shape[0])
-        jacobian_m = self.activations * (I - self.activations.T)
+        #I = np.eye(self.activations.shape[-1])
+        #sm = self.activations
+        #d_softmax = np.einsum('ij, jk -> ijk', sm, I) - \
+        #    np.einsum('ij, ik -> ijk', sm, sm)
+        # NOTE: This is only the diagonal of the Jacobian matrix
+        d_softmax = self.activations * (1 - self.activations)
 
-        return gradient * jacobian_m
+        return gradient * d_softmax
 
 
 if __name__ == '__main__':
@@ -283,7 +295,7 @@ if __name__ == '__main__':
     fc_layer2 = LinearLayer(n_nodes=3, n_inputs=3, learning_rate=learning_rate)
     fc_layer2.init_weights()
     print(fc_layer2)
-    relu_layer = ReLuLayer()
+    sm_layer = SoftmaxLayer()
 
     costs = []
     for i in range(n_epochs):
@@ -292,9 +304,11 @@ if __name__ == '__main__':
         #print('z1:', z1.shape)
         z2 = fc_layer2.forward_propogate(z1)
         #print('z2:', z2.shape)
-        #print('z2:', z2)
-        activations = relu_layer.forward_propogate(z2)
+        #print('z2:', z2[:5])
+        activations = sm_layer.forward_propogate(z2)
         #print('activations.shape:', activations.shape)
+        #print('activations:', activations[:5])
+
         # Calculate costs using squared error
         squared_error = 0.5 * np.sum((y_train - activations)**2)
         costs.append(squared_error)
@@ -302,10 +316,12 @@ if __name__ == '__main__':
         # Backward propogate error gradients
         d_error = activations - y_train
         #print('d_error:', d_error)
-        gradients_a = relu_layer.back_propogate(d_error)
+        gradients_a = sm_layer.back_propogate(d_error)
         #print('Gradients a:', gradients_a)
         #print('gradients_a.shape:', gradients_a.shape)
         gradients_z2 = fc_layer2.back_propogate(gradients_a)
+        #print('Weights shape:',fc_layer2.weights.shape)
+        #print('d_weights shape:', fc_layer2.d_weights.shape)
         fc_layer2.update_weights()
         #print('gradients_z2.shape:', gradients_z2.shape)
         gradients_z1 = fc_layer1.back_propogate(gradients_z2)
@@ -318,7 +334,7 @@ if __name__ == '__main__':
     # Get test predictions
     z1 = fc_layer1.forward_propogate(X_test)
     z2 = fc_layer2.forward_propogate(z1)
-    a = relu_layer.forward_propogate(z2)
+    a = sm_layer.forward_propogate(z2)
     predictions = np.argmax(a, axis=1)
     actual = one_hot_to_class(y_test)
 
