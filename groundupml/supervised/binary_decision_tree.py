@@ -27,7 +27,7 @@ class DecisionNode():
         self.threshold = threshold
         self.children = children
 
-    def print_subtree(self, prefix, is_leaf):
+    def print_subtree(self, prefix, is_leaf=True, is_left_child=None):
         """Prints the subtree of the Node
 
         Args:
@@ -41,18 +41,26 @@ class DecisionNode():
             is_leaf = True
             name = str(self.value)  # Leaf value representation
         else:
-            name = 'f' + str(self.feature_index)  # Nonleaf value representation
-        res = prefix + ('└──' if is_leaf else '├──') + name + '\n'
+            # Nonleaf value representation
+            name = f'f{self.feature_index} threshold: {self.threshold}'
+        if is_left_child is None:  # Root node
+            res = prefix + ('└────' if is_leaf else '├────') + name + '\n'
+        elif is_left_child:
+            res = prefix + ('└─<=─' if is_leaf else '├─<=─') + name + '\n'
+        else:
+            res = prefix + ('└─>──' if is_leaf else '├─>──') + name + '\n'
 
         if self.children is None:  # Allow for empty children list
             self.children = []
         for i, child in enumerate(self.children):
             if i == len(self.children) - 1:  # Don't put vertical if last child
+                # For left child
                 res += child.print_subtree(
-                    prefix + ('    ' if is_leaf else '│   '), True)
+                    prefix + ('     ' if is_leaf else '│     '), True, False)
             else:
+                # For right child
                 res += child.print_subtree(
-                    prefix + ('    ' if is_leaf else '│   '), False)
+                    prefix + ('     ' if is_leaf else '│     '), False, True)
 
         return res
 
@@ -83,7 +91,7 @@ class DecisionTree():
         self.n_features = None
 
     def __str__(self):
-        return self.root.print_subtree('', True)
+        return self.root.print_subtree('')
 
 
     def fit(self, X, y):
