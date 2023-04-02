@@ -42,13 +42,13 @@ class DecisionNode():
             name = str(self.value)  # Leaf value representation
         else:
             # Nonleaf value representation
-            name = f'f{self.feature_index} threshold: {self.threshold}'
+            name = f'f{self.feature_index} <= {self.threshold}'
         if is_left_child is None:  # Root node
             res = prefix + ('└────' if is_leaf else '├────') + name + '\n'
         elif is_left_child:
-            res = prefix + ('└─<=─' if is_leaf else '├─<=─') + name + '\n'
+            res = prefix + ('└──T──' if is_leaf else '├──T──') + name + '\n'
         else:
-            res = prefix + ('└─>──' if is_leaf else '├─>──') + name + '\n'
+            res = prefix + ('└──F──' if is_leaf else '├──F──') + name + '\n'
 
         if self.children is None:  # Allow for empty children list
             self.children = []
@@ -56,11 +56,11 @@ class DecisionNode():
             if i == len(self.children) - 1:  # Don't put vertical if last child
                 # For left child
                 res += child.print_subtree(
-                    prefix + ('     ' if is_leaf else '│     '), True, False)
+                    prefix + ('      ' if is_leaf else '│      '), True, False)
             else:
                 # For right child
                 res += child.print_subtree(
-                    prefix + ('     ' if is_leaf else '│     '), False, True)
+                    prefix + ('      ' if is_leaf else '│      '), False, True)
 
         return res
 
