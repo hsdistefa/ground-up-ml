@@ -108,25 +108,3 @@ class RandomForest():
         # NOTE: This assumes that the classes are encoded as integers
         # starting at 0
         return np.array([np.bincount(preds).argmax() for preds in tree_preds.T])
-
-
-if __name__ == '__main__':
-    # Demonstrate forest can learn XOR function
-    np.random.seed(2)  # Set seed for reproducibility
-    X_train = np.array([[0, 0],
-                        [1, 0],
-                        [0, 1],
-                        [1, 1],
-                        [0, 0]])
-
-    y_train = np.array([0, 1, 1, 0, 0])
-
-    rf = RandomForest(n_trees=3, max_depth=5, impurity_func='gini')
-    rf.fit(X_train, y_train)
-
-    for tree in rf.trees:
-        print(tree)
-    
-    X_test = X_train
-    predictions = rf.predict(X_test)
-    print(predictions)

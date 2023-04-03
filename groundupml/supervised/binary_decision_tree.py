@@ -45,9 +45,9 @@ class DecisionNode():
             name = f'f{self.feature_index} <= {self.threshold}'
         if is_left_child is None:  # Root node
             res = prefix + ('└────' if is_leaf else '├────') + name + '\n'
-        elif is_left_child:
+        elif is_left_child:  # True Branch
             res = prefix + ('└──T──' if is_leaf else '├──T──') + name + '\n'
-        else:
+        else:  # False Branch
             res = prefix + ('└──F──' if is_leaf else '├──F──') + name + '\n'
 
         if self.children is None:  # Allow for empty children list
