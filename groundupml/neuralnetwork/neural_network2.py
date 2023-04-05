@@ -2,8 +2,6 @@ from __future__ import print_function, division
 
 import numpy as np
 
-from groundupml.utils.functions import sigmoid, sigmoid_prime, softmax
-
 
 class LinearLayer():
     """Fully connected layer that applies a linear transformation to the input:
@@ -92,93 +90,3 @@ class LinearLayer():
     def __repr__(self):
         return 'LinearLayer(n_nodes={}, n_inputs={}, learning_rate={})'.format(
             self.n_nodes, self.n_inputs, self.learning_rate)
-
-
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-
-    from sklearn import datasets
-
-    from groundupml.utils.data_manipulation import split_data, scale_min_max
-    from groundupml.utils.functions import one_hot_to_class, to_one_hot
-    from groundupml.utils.data_tools import confusion_matrix
-
-    # Set seed for reproducibility
-    np.random.seed(1)
-
-    # Load data
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
-
-    # Split into train and test sets
-    X_train, y_train, X_test, y_test = split_data(X, y, proportion=0.8)
-
-    # Scale features to be between 0 and 1 for NN
-    X_train = scale_min_max(X_train)
-    X_test = scale_min_max(X_test)
-
-    # Convert labels to one hot vectors
-    y_train = to_one_hot(y_train)
-    y_test = to_one_hot(y_test)
-
-    print('Train shapes:', X_train.shape, y_train.shape)
-    print('Test shapes:', X_test.shape, y_test.shape)
-
-    # Train neural network
-    n_epochs = 10000
-    learning_rate = 1e-2
-
-    fc_layer1 = LinearLayer(n_nodes=3, n_inputs=4, learning_rate=learning_rate)
-    fc_layer1.init_weights()
-    print(fc_layer1)
-    fc_layer2 = LinearLayer(n_nodes=3, n_inputs=3, learning_rate=learning_rate)
-    fc_layer2.init_weights()
-    print(fc_layer2)
-    sm_layer = SoftmaxLayer()
-
-    costs = []
-    for i in range(n_epochs):
-        # Forward propogate
-        z1 = fc_layer1.forward_propogate(X_train)
-        #print('z1:', z1.shape)
-        z2 = fc_layer2.forward_propogate(z1)
-        #print('z2:', z2.shape)
-        #print('z2:', z2[:5])
-        activations = sm_layer.forward_propogate(z2)
-        #print('activations.shape:', activations.shape)
-        #print('activations:', activations[:5])
-
-        # Calculate costs using squared error
-        squared_error = 0.5 * np.sum((y_train - activations)**2)
-        costs.append(squared_error)
-
-        # Backward propogate error gradients
-        d_error = activations - y_train
-        #print('d_error:', d_error)
-        gradients_a = sm_layer.back_propogate(d_error)
-        #print('Gradients a:', gradients_a)
-        #print('gradients_a.shape:', gradients_a.shape)
-        gradients_z2 = fc_layer2.back_propogate(gradients_a)
-        #print('Weights shape:',fc_layer2.weights.shape)
-        #print('d_weights shape:', fc_layer2.d_weights.shape)
-        fc_layer2.update_weights()
-        #print('gradients_z2.shape:', gradients_z2.shape)
-        gradients_z1 = fc_layer1.back_propogate(gradients_z2)
-        fc_layer1.update_weights()
-        #print('gradients_z1.shape:', gradients_z1.shape)
-
-        if i % 1000 == 0:
-            print('Epoch:', i, 'Cost:', costs[-1])
-
-    # Get test predictions
-    z1 = fc_layer1.forward_propogate(X_test)
-    z2 = fc_layer2.forward_propogate(z1)
-    a = sm_layer.forward_propogate(z2)
-    predictions = np.argmax(a, axis=1)
-    actual = one_hot_to_class(y_test)
-
-    print(predictions)
-    print(actual)
-
-    print(confusion_matrix(actual, predictions))

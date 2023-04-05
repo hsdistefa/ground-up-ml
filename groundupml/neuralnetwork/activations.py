@@ -1,5 +1,7 @@
 from __future__ import print_function, division
 
+import numpy as np
+
 from groundupml.utils.functions import sigmoid, sigmoid_prime, softmax
 
 
