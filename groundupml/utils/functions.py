@@ -1,8 +1,31 @@
 from __future__ import division, print_function
 
-import math
-
 import numpy as np
+
+
+def cross_entropy(y_pred, y_actual):
+    """Calculate the cross entropy between two distributions
+
+    Cross entropy represents the number of bits needed to identify an event from
+    a set of possibilities. In this case, the event is the true label and the
+    set of possibilities are the predicted labels. The lower the cross entropy,
+    the better the model is at predicting the true label.
+
+    Args:
+        y_pred (numpy array of shape [n_samples, n_classes]):
+            Predicted distribution
+        y_actual (numpy array of shape [n_samples, n_classes]):
+            True distribution
+
+    Returns:
+        cross_entropy (float):
+            Cross entropy between the two distributions
+    """
+    # NOTE: This function assumes that the distributions are normalized, i.e.
+    #       that the sum of each row is 1.0 in both y_pred and y_actual
+    # NOTE: Add epsilon to prevent log(0) error
+    N = y_pred.shape[0]
+    return -np.sum(y_actual * np.log(y_pred + 1e-8)) / N
 
 
 def euclidean_distance(p1, p2):
