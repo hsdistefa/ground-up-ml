@@ -1,7 +1,23 @@
+import numpy as np
 import pytest
 
 
 from groundupml.utils import functions
+
+
+test_cross_entropy_input = [(np.array([0.1, 0.1, 0.8]),
+                             np.array([0, 0, 1]),
+                             0.07438
+                            ),
+                            (np.array([0.8, 0.1, 0.1]),
+                             np.array([0, 0, 1]),
+                             0.76752
+                            ),
+                            (np.array([0.57, 0.05, 0.14, 0.10, 0.14]), 
+                             np.array([1,0,0,0,0]), 
+                             0.1124
+                            ),
+                           ]
 
 
 test_entropy_input = [([1,0], 1),
@@ -25,6 +41,10 @@ test_info_gain_input = [([[1,0],[0,1]], 0),
                         ([[1,1,1,1,1,1,1,1,0,0,0,0,0,0],[1,1,0,0,0,0]], 0.03487),
                         ([[1,1,2,3,5,5],[2,3,4,4]], 0.5712)
                        ]
+
+@pytest.mark.parametrize("y_hat,y,expected", test_cross_entropy_input)
+def test_cross_entropy_equal(y_hat, y, expected):
+    assert functions.cross_entropy(y_hat, y) == pytest.approx(expected, rel=1e-3)
 
 @pytest.mark.parametrize("y,expected", test_entropy_input)
 def test_entropy_equal(y, expected):
