@@ -219,6 +219,7 @@ class SoftmaxCrossEntropyLayer():
                 Cross entropy loss for each sample
         """
         # TODO: Make this work for multiple samples
-        self.cross_entropy_loss = cross_entropy(self.activations, actual)
+        self.cross_entropy_loss = cross_entropy(self.activations, actual, 
+                                                reduction='mean')
 
         return self.cross_entropy_loss

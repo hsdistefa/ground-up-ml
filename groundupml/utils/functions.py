@@ -3,7 +3,7 @@ from __future__ import division, print_function
 import numpy as np
 
 
-def cross_entropy(y_pred, y_actual):
+def cross_entropy(y_pred, y_actual, reduction='mean'):
     """Calculate the cross entropy between two distributions
 
     Cross entropy represents the number of bits needed to identify an event from
@@ -15,17 +15,27 @@ def cross_entropy(y_pred, y_actual):
         y_pred (numpy array of shape [n_samples, n_classes]):
             Predicted distribution
         y_actual (numpy array of shape [n_samples, n_classes]):
-            True distribution
+            True distribution (one-hot encoded)
+        reduction (str, optional):
+            Method to reduce cross entropy across samples. Options are 'mean'
+            and 'sum'
 
     Returns:
         cross_entropy (float):
             Cross entropy between the two distributions
     """
     # NOTE: This function assumes that the distributions are normalized, i.e.
-    #       that the sum of each row is 1.0 in both y_pred and y_actual
-    # NOTE: Add epsilon to prevent log(0) error
-    N = y_pred.shape[0]
-    return -np.sum(y_actual * np.log(y_pred + 1e-8)) / N
+    #       that the sum of each row is 1.0 in both y_pred and y_actual. This
+    #       can be achieved by applying the softmax activation function first.
+    log_likelihoods = -y_actual * np.log(y_pred + 1e-8)
+
+    if reduction == 'mean':
+        N = y_pred.shape[0]
+        cross_entropy = np.sum(log_likelihoods) / N
+    elif reduction == 'sum':
+        cross_entropy = np.sum(log_likelihoods)
+
+    return cross_entropy
 
 
 def euclidean_distance(p1, p2):

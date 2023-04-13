@@ -5,18 +5,13 @@ import pytest
 from groundupml.utils import functions
 
 
-test_cross_entropy_input = [(np.array([0.1, 0.1, 0.8]),
-                             np.array([0, 0, 1]),
-                             0.07438
-                            ),
-                            (np.array([0.8, 0.1, 0.1]),
-                             np.array([0, 0, 1]),
-                             0.76752
-                            ),
-                            (np.array([0.57, 0.05, 0.14, 0.10, 0.14]), 
-                             np.array([1,0,0,0,0]), 
-                             0.1124
-                            ),
+test_cross_entropy_input = [
+                            (np.array([[0.1, 0.1, 0.8],  
+                                       [0.8, 0.1, 0.1]]),
+                             np.array([[0, 0, 1],
+                                       [0, 0, 1]]),
+                             1.263  # Assumes mean reduction
+                            )
                            ]
 
 
