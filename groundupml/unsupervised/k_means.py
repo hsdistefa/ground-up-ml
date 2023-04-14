@@ -29,6 +29,7 @@ class KMeans():
         self.k = k
         self.max_iterations = max_iterations
         self.init_method = init_method
+        self.centroids = None
         self._n_samples = None
         self._n_features = None
 
@@ -46,21 +47,21 @@ class KMeans():
         self._n_samples, self._n_features = np.shape(X)
 
         # Initialize centroids
-        centroids = self._initialize_centroids(X)
+        self.centroids = self._initialize_centroids(X)
         prev_centroids = np.zeros((self.k, self._n_features))
         # Iterate only until convergence or max iterations
         for _ in range(self.max_iterations):
             # Has converged if the centroids haven't changed
-            difference = centroids - prev_centroids
+            difference = self.centroids - prev_centroids
             if not difference.any():
                 break
 
             # Assign each point to the closest centroid
-            clusters = self._get_clusters(centroids, X)
+            clusters = self._get_clusters(self.centroids, X)
 
             # Calculate new centroids
-            prev_centroids = centroids
-            centroids = self._get_new_centroids(X, clusters)
+            prev_centroids = self.centroids
+            self.centroids = self._get_new_centroids(X, clusters)
         return self._get_cluster_labels(clusters)
 
     def _get_clusters(self, centroids, X):
