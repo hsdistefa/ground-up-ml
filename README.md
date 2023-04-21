@@ -21,7 +21,7 @@ Copy and paste the URL for the jupyter server into your browser, it should be of
     http://localhost:8888/?token=...
 ```
 
-## Example Usage
+## Examples
 
 ### Random Forest
 A Random Forest model trained on the Iris dataset. To do this 3 separate decision trees are constructed on a subset of the dataset containing randomly selected samples (with replacement, a.k.a ![bootstrapping](https://en.wikipedia.org/wiki/Bootstrapping_(statistics))) and features. These simplified training sets help to reduce over-fitting which is a common issue found with individual decision trees.
@@ -50,6 +50,26 @@ These steps are then repeated for the remaining two trees, yielding predictions 
 
 <!-- # TODO: Add Confusion Matrix of Results-->
 
+### K-Means
+
+K-Means clustering attempts to group data into a user-provided number of groups (K). First, one point is chosen to be the 'center' for each of the K groups. Then:
+
+1) Each point in the dataset is assigned to the group with the nearest center by distance.
+2) Centers are re-calculated to be the mean of each of the groups
+
+Steps 1 and 2 are repeated until either the centers do not change when they are re-calculated or a maximum number of iterations is reached.
+
+Below is an example showing each iteration of K-Means clustering using a K of 3 on a globular dataset.
+
+![k-means_animation](https://user-images.githubusercontent.com/5913237/232170301-ffebac23-09c4-4eec-952f-03d3bf0a259b.gif)
+
+The 3 centers are shown as red crosses and each data point is colored by the group it is assigned to at each step.
+
+### DBSCAN
+DBSCAN on a moons dataset. The right figure shows how DBSCAN clusters the original dataset (left figure), with green and yellow corresponding to its guesses for the clustering and the purple being labeled as noise.
+
+![DBSCAN on Moon-Shaped Data](https://user-images.githubusercontent.com/5913237/31640535-f8c2dc74-b293-11e7-8803-018a124c2812.png)
+
 
 ### PCA
 PCA done on a dataset consisting of handwritten digit images. Each color corresponds to one of the digits 0 through 9.
@@ -57,9 +77,3 @@ PCA done on a dataset consisting of handwritten digit images. Each color corresp
 The transformation does a good job of clustering each digit using only the first two principal components as features. Adding a third principal components would do even better and is a huge improvement on the original feature-space of 728 dimensions!
 
 ![PCA on Digits Dataset](https://user-images.githubusercontent.com/5913237/31640503-c3f59810-b293-11e7-8d9e-06e7d0e54c61.png)
-
-
-### DBSCAN
-DBSCAN on a moons dataset. The right figure shows how DBSCAN clusters the original dataset (left figure), with green and yellow corresponding to its guesses for the clustering and the purple being labeled as noise.
-
-![DBSCAN on Moon-Shaped Data](https://user-images.githubusercontent.com/5913237/31640535-f8c2dc74-b293-11e7-8803-018a124c2812.png)
