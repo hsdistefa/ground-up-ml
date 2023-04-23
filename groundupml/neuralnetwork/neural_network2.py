@@ -167,3 +167,113 @@ class EmbeddingLayer():
     def __repr__(self):
         return 'EmbeddingLayer(vocab_size={}, embedding_size={}, learning_rate={})'.format(
             self.vocab_size, self.embedding_size, self.learning_rate)
+
+
+if __name__ == '__main__':
+    # Test embedding layer
+    #from groundupml.neuralnetwork.activations import SoftmaxLayer
+    from groundupml.utils.functions import softmax
+
+    with open('shakespeare.txt', 'r', encoding='utf-8') as f:
+        text = f.read()
+
+    print('length of text in chars:', len(text))
+    print(text[:500])
+
+    # Get unique characters
+    chars = sorted(list(set(text)))
+    print(''.join(chars))  # Print all unique characters
+
+    # Create mappings for all unique characters in text
+    CHAR_TO_IDX = {ch:i for i, ch in enumerate(chars)}  # chars -> ints
+    IDX_TO_CHAR = {i:ch for i, ch in enumerate(chars)}  # ints -> chars
+
+    def encode(chars):
+        return np.array([CHAR_TO_IDX[c] for c in chars])
+
+    def decode(chars):
+        return np.array([IDX_TO_CHAR[i] for i in chars])
+
+    train_data = encode(text)
+
+    # Print encoded text
+    print(train_data[:500])
+
+    np.random.seed(1)
+    def get_batch(data, batch_size, block_size):
+        # Build batch_size random batches of size block_size (Batch, Time)
+        # NOTE: block size will be the time dimension referenced later
+        ix = np.random.randint(low=0, high=len(data) - block_size, 
+                               size=(batch_size,)) # Randomly select start index
+        x = np.stack([data[i:i+block_size] for i in ix], axis=0)
+
+        y = np.stack([data[i+1:i+block_size+1] for i in ix], axis=0)
+
+        return x, y
+
+    X_batch, y_batch = get_batch(train_data, batch_size=32, block_size=8)
+    print('X_batch shape:', X_batch.shape)
+    print('y_batch shape:', y_batch.shape)
+    print('X_batch:\n', X_batch)
+    print('y_batch:\n', y_batch)
+
+    # Double check batch and decode are correct
+    # NOTE: will be jumbled samples of text of length block_size
+    X_decode_batch = [[''.join(decode(row))] for row in X_batch]
+    print('X_decode_batch:\n')
+    for row in X_decode_batch:
+        print(row)
+
+    # Define model
+    vocab_size = len(chars)
+    learning_rate = .01
+    token_embedding_table = EmbeddingLayer(vocab_size, vocab_size, 
+                                           learning_rate=learning_rate)
+    token_embedding_table.init_weights()
+    print(token_embedding_table)
+    #sm_layer = SoftmaxLayer()
+    #print(sm_layer)
+
+    # Sanity check
+    print('Vocab Size:', vocab_size)
+    print('Embeddings shape:', token_embedding_table.weights.shape)
+    #print(token_embedding_table.weights[:1])
+    idx = X_batch  # Shape: (batch_size, block_size)
+    print('idx Shape:', idx.shape)
+    print(idx[:2])
+    print('Decoded idx:')
+    for row in idx[:2]:
+        print(''.join(decode(row)))
+
+    def generate(idx, n_new_tokens):
+        for _ in range(n_new_tokens):
+            logits = token_embedding_table.weights[idx]  # Shape: (batch_size, block_size, vocab_size)
+            #print('logits shape:', logits.shape)
+            # Predictions are only on last time step, that is the last token in the 
+            # sequence for each sample in the batch
+            logits = logits[:, -1, :]  
+            #print('last block logits shape:', logits.shape)
+            probabilities = softmax(logits)
+            #print('softmax logits shape:', probabilities.shape)
+            #print(probabilities[:2])
+            # Sample from the distribution of possible tokens in the last time step 
+            # created by softmax. This adds some randomness so the predicted token isn't
+            # always the most probable, which can make predictions 'flat'
+            # NOTE: Need int array so can be used as indices into weights
+            # NOTE: uint8 may be too small for very large vocab sizes, but 
+            #       otherwise saves memory
+            idx_next = np.zeros((probabilities.shape[0], 1), dtype=np.uint8)
+            for i in range(probabilities.shape[0]):
+                choice = np.random.multinomial(n=1, pvals=probabilities[i])
+                idx_next[i] = np.argmax(choice)  # Get index of sampled token
+            #print('idx_next shape:', idx_next.shape)
+            #print(idx_next)
+            # Append sampled index to the running sequence
+            idx = np.concatenate((idx, idx_next), axis=1)
+            #print('idx new shape:', idx.shape)
+            #print(idx)
+        return idx
+
+    predictions = generate(idx, 500)
+    print(''.join(decode( predictions[0].tolist() )))
+        
